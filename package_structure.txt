@@ -1,0 +1,32 @@
+ftp_transfer
+├── changelog.md
+├── file_processor
+│   ├── __main__.py
+│   ├── cli.py
+│   ├── notification
+│   │   ├── __init__.py
+│   │   └── email.py
+│   ├── processors
+│   │   ├── __init__.py
+│   │   ├── dram.py
+│   │   └── logic.py
+│   ├── stores
+│   │   ├── __init__.py
+│   │   ├── ftp.py
+│   │   ├── ftps.py
+│   │   ├── local.py
+│   │   ├── sftp.py
+│   │   └── store.py
+│   └── utils
+│       ├── config.py
+│       └── logger.py
+├── ftp_transfer_files.txt
+├── package_structure.txt
+├── readme.md
+├── scripts
+│   ├── build.sh
+│   └── proxy.sh
+├── setup.py
+└── test_ftp_match.py
+
+7 directories, 23 files

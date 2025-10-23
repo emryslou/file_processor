@@ -1,0 +1,12 @@
+Date:,2025/10/22 13:47,,,,,,,,,,,,,,
+Customer ID:,,Product ID:,0CSN,Lot Pass/Fail:,Pass,,,,,,,,,,
+Lot ID:,KPB425,Wafer Qty:,5,Lot Type:,PROD,,,,,,,,,,
+,,,,,,,,,,,,,,,
+Wafer ID,T7Code,BOW_X_UM,Pass/Fail,BOW_Y_UM,Pass/Fail,BOW_XY_UM,Pass/Fail,TTV_THK_RNG_A,Pass/Fail,SI_THK_UM,Pass/Fail,MAC_FS_DDP,Pass/Fail,VI Pass/Fail,Final Pass/Fail
+#02,PWATU107MX,,Pass,,Pass,,Pass,,Pass,,Pass,,Pass,Pass,Pass
+#03,PWATU106MX,,Pass,,Pass,,Pass,,Pass,,Pass,,Pass,Pass,Pass
+#04,PWATU105MX,,Pass,,Pass,,Pass,,Pass,,Pass,,Pass,Pass,Pass
+#05,PWATU104MX,,Pass,,Pass,,Pass,,Pass,,Pass,,Pass,Pass,Pass
+#06,PWATU103MX,,Pass,,Pass,,Pass,,Pass,,Pass,,Pass,Pass,Pass
+Spec USL,,,,,,,,,,,,,,,
+Spec LSL,,,,,,,,,,,,,,,
