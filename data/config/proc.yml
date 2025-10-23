@@ -81,4 +81,4 @@ app:
       smtp_server: "smtp.qq.com"   # SMTP服务器地址
       smtp_port: 465                    # SMTP服务器端口
       smtp_username: "emrys.liu@foxmail.com"  # SMTP用户名
-      smtp_password: "ncyuytguwiiibefi"    # SMTP密码或授权码
+      smtp_password: "xxxx"    # SMTP密码或授权码
