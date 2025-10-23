@@ -1,4 +1,6 @@
-ftp_transfer
+file_processor
+├── LICENSE
+├── README.md
 ├── changelog.md
 ├── file_processor
 │   ├── __main__.py
@@ -20,13 +22,14 @@ ftp_transfer
 │   └── utils
 │       ├── config.py
 │       └── logger.py
-├── ftp_transfer_files.txt
+├── file_processor.txt
 ├── package_structure.txt
 ├── readme.md
 ├── scripts
 │   ├── build.sh
 │   └── proxy.sh
 ├── setup.py
-└── test_ftp_match.py
+└── tests
+    └── test_ftp_match.py
 
-7 directories, 23 files
+8 directories, 25 files
