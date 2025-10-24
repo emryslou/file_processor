@@ -3,6 +3,7 @@ import pandas as pd
 
 from file_processor.stores import create_store
 from file_processor.utils.logger import logger
+from file_processor.utils.tools import read_file_by_type
 
 def proc_t7_code_file(input_file: str|Path, output_dir: str|Path) -> Path:
     """ 处理 Logic T7Code 文件"""
@@ -19,7 +20,7 @@ def proc_t7_code_file(input_file: str|Path, output_dir: str|Path) -> Path:
         logger.info("T7Code 文件开始转换 ...")
         
         # 读取 csv 文件
-        df = pd.read_excel(input_file)
+        df, _file_type = read_file_by_type(input_file)
         
         # 提取 lot_id
         lot_id = df['LOT NAME'].iloc[0]
@@ -74,7 +75,7 @@ def proc_coa_file(input_file: str|Path, output_dir: str|Path) -> Path:
         logger.info("Logic COA 文件开始转换 ...")
         
         # 读取 csv 文件
-        old_df = pd.read_excel(input_file)
+        old_df, _file_type = read_file_by_type(input_file)
         
         # 提取 lot_id
         lot_id = old_df.iloc[1, 0]
@@ -179,7 +180,7 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
     try:
         logger.info("Logic APC 文件开始转换 ...")
         
-        old_df = pd.read_excel(input_file)
+        old_df, _file_type = read_file_by_type(input_file)
 
         lot_id = old_df.iloc[2, 1]
         new_columns = old_df.columns[0:4].tolist()

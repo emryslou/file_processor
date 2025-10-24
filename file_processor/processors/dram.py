@@ -1,7 +1,8 @@
-from loguru import logger
 from pathlib import Path
-from ..stores import create_store
 import pandas as pd
+
+from file_processor.utils.logger import logger
+from file_processor.utils.tools import read_file_by_type
 
 
 def proc_t7_code_file(input_file: str|Path, output_dir: str|Path) -> Path:
@@ -19,7 +20,7 @@ def proc_t7_code_file(input_file: str|Path, output_dir: str|Path) -> Path:
         
         # 指定header=None，避免将第一行作为表头
         # 指定dtype=str，保持所有数据的原始格式，避免自动格式化日期
-        df = pd.read_excel(input_file, header=None, dtype=str) 
+        df, _file_type = read_file_by_type(input_file, header=None, dtype=str) 
         lot_id = df.iloc[2, 1]
         
         # 从第5行开始，逐行复制，知道第一列为的值为 Spec USL 为止
@@ -70,7 +71,7 @@ def proc_coa_file(input_file: str|Path, output_dir: str|Path) -> Path:
         
         # 指定header=None，避免将第一行作为表头
         # 指定dtype=str，保持所有数据的原始格式，避免自动格式化日期
-        df = pd.read_excel(input_file, header=None, dtype=str) 
+        df, _file_type = read_file_by_type(input_file, header=None, dtype=str) 
         lot_id = df.iloc[2, 1]
 
         new_df = df.copy()
@@ -102,7 +103,9 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
     try:
         logger.info(f"Dram APC 文件开始转换, 源文件: {input_file}")
         
-        df = pd.read_excel(input_file)
+        df, _file_type = read_file_by_type(input_file, header=None, dtype=str)
+        if _file_type == 'csv': # csv 跳过第一行
+            df = df.iloc[1:, :]
         lot_id = df.iloc[0, 2]
 
         new_colums = [
@@ -149,7 +152,7 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
                         else:
                             raise ValueError(f"无效的索引 {idx}，必须在1-25之间, 对应数据: {item_column}: {item_str}")
             except (ValueError, IndexError) as e:
-                logger.error(f"警告: 处理项目 '{items.iloc[idx, 9:]}' 时出错: {e}")
+                logger.exception(f"警告: 处理项目 '{items.iloc[idx, 9:]}' 时出错: {e}")
                 raise
             
             # 将结果转换为25位二进制字符串（确保前导零）

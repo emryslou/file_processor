@@ -11,7 +11,7 @@ setup(
     author="Emrys Liu",
     author_email="emrys.liu@foxmail.com",  # 修复邮箱地址格式错误
     description="文件处理",
-    long_description="""Demo""",
+    long_description="""文件处理器""",
     long_description_content_type="text/markdown",
     url="https://github.com/emryslou/file_processor",  # 替换为实际仓库地址
     packages=[
