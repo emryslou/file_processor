@@ -6,10 +6,53 @@ from pathlib import Path
 
 from . import logic, dram
 
-_drivers = {
-    'logic': logic,
-    'dram': dram,
-}
+_drivers = { 'logic': logic, 'dram': dram, }
+
+def _proc_files_init_store(config: dict) -> dict[str, dict]:
+    """初始化处理文件的 store
+    """
+    stores = {}
+    for key, key_cfg in {
+        'dl': 'dl_path', 'ul': 'ul_path', 'bak': 'bak_path',
+    }.items():
+        stores[key] = {
+            'store': create_store(config[key_cfg]['store']),
+            'config': config[key_cfg]
+        }
+    return stores
+
+
+def _proc_files_backup_files(
+        stores: dict[str, dict],
+        backup_files: dict[Path, Path],
+    ):
+    """备份处理后的文件
+    """
+    for input_file, bak_file in backup_files.items():
+        stores['bak']['store'].mv(input_file, stores['bak']['store'].get_path(bak_file))
+        logger.info(f"{driver} 文件 {input_file} 备份到 {bak_file}")
+
+
+def _proc_file(
+        stores: dict[str, dict],
+        input_file: Path,
+        tmp_path: Path,
+        fn: callable,
+    ) -> tuple[Path, Path, Path]:
+    remote_file = stores['dl']['store'].get_path(input_file)
+                    
+    # 下载到本地
+    input_file = stores['dl']['store'].download(remote_file, tmp_path / input_file.name)
+    # 处理文件
+    output_file = fn(input_file, tmp_path)
+    
+    # 上传到 ul_path
+    stores['ul']['store'].upload(output_file, stores['ul']['store'].get_path(stores['ul']['config']['path']))
+
+    # 备份到 bak_path   
+    bak_file = Path(stores['bak']['config']['path']) / input_file.name
+
+    return remote_file, output_file, bak_file
 
 def proc_files(config: dict):
     """处理 文件的逻辑函数
@@ -19,26 +62,13 @@ def proc_files(config: dict):
     3. 对每个文件调用对应的处理函数，处理后的文件放入 ul_path 中
     4. 若处理成功，将原文件移动到 bak_path 中
     """
-    result = {
-        'status': '',
-        'message': '',
-        'info': {},
-    }
+    result = { 'status': '', 'message': '', 'info': {}, }
     driver = config['driver']
     assert driver is not None, "未指定驱动"
     assert driver in _drivers, f"未找到驱动 {driver}"
     stores: dict[str, dict] = {}
     try:
-        result['status'] = 'store'
-        stores = {   
-            key: {
-                'store': create_store(config[key_cfg]['store']),
-                'config': config[key_cfg]
-            }
-            for key, key_cfg in {
-                'dl': 'dl_path', 'ul': 'ul_path', 'bak': 'bak_path',
-            }.items()
-        }
+        stores = _proc_files_init_store(config)
 
         result['status'] = 'scan_path'
         scan_path = stores['dl']['store'].get_path(stores['dl']['config']['path'])
@@ -52,10 +82,8 @@ def proc_files(config: dict):
             proc_type = proc_info['type']
             fn_name = f"proc_{proc_type}_file"
             result['info'][proc_type] = {
-                'filter': proc_info['filter'],
-                'driver': config['driver'],
-                'proc_type': proc_type,
-                'files': {}
+                'filter': proc_info['filter'], 'driver': config['driver'],
+                'proc_type': proc_type, 'files': {}
             }
             
             fn = getattr(_drivers[config['driver']], fn_name, None)
@@ -73,19 +101,9 @@ def proc_files(config: dict):
 
             for input_file in procs_files:
                 try:
-                    remote_file = stores['dl']['store'].get_path(input_file)
-                    
-                    # 下载到本地
-                    input_file = stores['dl']['store'].download(remote_file, tmp_path / input_file.name)
-                    # 处理文件
-                    output_file = fn(input_file, tmp_path)
-                    
-                    # 上传到 ul_path
-                    stores['ul']['store'].upload(output_file, stores['ul']['store'].get_path(stores['ul']['config']['path']))
+                    remote_file, output_file, bak_file = _proc_file(stores, input_file, tmp_path, fn)
                     logger.info(f"{driver} 文件 {input_file} 处理完成, 处理后的文件: {output_file}")
-
-                    # 备份到 bak_path   
-                    backup_files[str(remote_file)] = Path(stores['bak']['config']['path']) / input_file.name
+                    backup_files[str(remote_file)] = bak_file
 
                     result['info'][proc_type]['files']['success'][str(input_file)] = str(output_file)
                 except Exception as e:
@@ -93,9 +111,7 @@ def proc_files(config: dict):
 
         # 备份所有文件
         result['status'] = 'backup_files'
-        for input_file, bak_file in backup_files.items():
-            stores['bak']['store'].mv(input_file, stores['bak']['store'].get_path(bak_file))
-            logger.info(f"{driver} 文件 {input_file} 备份到 {bak_file}")
+        _proc_files_backup_files(stores, backup_files)
         
         if not any(result['info'][proc_type]['files']['error'] for proc_type in result['info']):
             result['status'] = 'success'
