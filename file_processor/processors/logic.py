@@ -1,9 +1,9 @@
 from pathlib import Path
 import pandas as pd
 
-from file_processor.stores import create_store
 from file_processor.utils.logger import logger
 from file_processor.utils.tools import read_file_by_type
+
 
 def proc_t7_code_file(input_file: str|Path, output_dir: str|Path) -> Path:
     """ 处理 Logic T7Code 文件"""
