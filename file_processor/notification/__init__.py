@@ -1,5 +1,3 @@
-from file_processor.utils.logger import logger
-import json
 from .email import EmailNotification
 
 def send_notification(notify_type: str, body: str):
@@ -8,6 +6,7 @@ def send_notification(notify_type: str, body: str):
         email_notifier.send(body)
     else:
         logger.warning(f"未知的通知类型: {notify_type}")    
+
 
 def gen_notification_body_html(result_info: dict) -> str:
     """
@@ -225,6 +224,25 @@ def gen_notification_body_html(result_info: dict) -> str:
                     padding: 8px;
                 }
             }
+            
+            /* 元数据信息样式 - 弱化显示 */
+            .metadata-info {
+                margin-top: 30px;
+                padding: 15px;
+                background-color: #f8f9fa;
+                border-top: 1px solid #e9ecef;
+                font-size: 0.9em;
+                color: #6c757d;
+                font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            }
+            
+            .metadata-item {
+                margin-bottom: 5px;
+            }
+            
+            .metadata-label {
+                font-weight: 500;
+            }
         </style>
     </head>
     <body>
@@ -309,8 +327,21 @@ def gen_notification_body_html(result_info: dict) -> str:
         
         html += "</div>"  # 结束driver-section
     
-    # 结束HTML
-    html += """
+    # 添加Elapsed Time和Trace ID信息
+
+    runtime = result_info.get('runtime', {})
+    elapsed_time = runtime.get('elapsed_time_human_readable', '--')
+    trace_id = runtime.get('trace_id', '--')
+    
+    html += f"""
+            <div class="metadata-info">
+                <div class="metadata-item">
+                    <span class="metadata-label">执行时间:</span> {elapsed_time}
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">跟踪ID:</span> {trace_id}
+                </div>
+            </div>
         </div>
     </body>
     </html>
@@ -376,6 +407,16 @@ def gen_notification_body_text(result_info: dict) -> str:
         
         text_lines.append("")  # 每个driver后空一行
     
+    # 添加Elapsed Time和Trace ID信息
+    runtime = result_info.get('runtime', {})
+    elapsed_time = runtime.get('elapsed_time_human_readable', '--')
+    trace_id = runtime.get('trace_id', '--')
+    
+    text_lines.append("\n" + "="*80)
+    text_lines.append("元数据信息")
+    text_lines.append("-"*80)
+    text_lines.append(f"执行时间: {elapsed_time}")
+    text_lines.append(f"跟踪ID: {trace_id}")
     text_lines.append("="*80)
     
     return '\n'.join(text_lines)
