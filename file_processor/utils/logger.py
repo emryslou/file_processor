@@ -37,7 +37,7 @@ def get_trace_id() -> str:
 def _custom_formatter(record):
     set_default_trace_id()
     record["extra"]["trace_id"] = _current_trace_id
-    return "[{time:YYYY-MM-DD HH:mm:ss.SSS}][{extra[trace_id]}]|{level: <8}|{module}:{function}:{line} - {message}"
+    return "[{time:YYYY-MM-DD HH:mm:ss.SSS}][{extra[trace_id]}]|{level: <8}|{module}:{function}|{file}:{line} - {message}"
 
 def _console_formatter(record):
     set_default_trace_id()
@@ -47,7 +47,8 @@ def _console_formatter(record):
         "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green>"  # 时间
         "|<magenta>{extra[trace_id]}</magenta>"  # 跟踪ID
         "|<level>{level:<8}</level>"  # 日志级别
-        "|<cyan>{module}</cyan>.<cyan>{function}</cyan>:<cyan>{line}</cyan>"  # 模块、函数和行号
+        "|<cyan>{module}</cyan>.<cyan>{function}</cyan>"
+        "|<cyan>{file}</cyan>:{line}"  # 模块、函数和行号
         " - <level>{message}</level>\n"  # 消息内容
     )
     return format_str

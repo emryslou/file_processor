@@ -101,17 +101,13 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
     """
 
     try:
-        logger.info(f"Dram APC 文件开始转换, 源文件: {input_file}")
+        df, _file_type = read_file_by_type(input_file, dtype=str)
         
-        df, _file_type = read_file_by_type(input_file, header=None, dtype=str)
-        if _file_type == 'csv': # csv 跳过第一行
-            df = df.iloc[1:, :]
+        logger.info(f"Dram APC 文件读取完成, 源文件: {input_file}, 数据行数: {len(df)}, 文件类型: {_file_type}")
+        
         lot_id = df.iloc[0, 2]
 
-        new_colums = [
-            df.columns[0],
-            df.columns[1], 
-        ]
+        new_colums = [ df.columns[0], df.columns[1], ]
         new_colums.extend(df.columns[3:])
 
         new_df = pd.DataFrame(columns=new_colums, dtype=object)
