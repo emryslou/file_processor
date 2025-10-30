@@ -16,7 +16,6 @@ def cli(config: str|Path):
     
     processors = app_cfg['processors']
     notify_types = app_cfg.get('notification', [])
-
     result_info = {
         'processor': {
             processor['driver']: {}

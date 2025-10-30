@@ -7,7 +7,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name="file_processor",
-    version="0.0.1",
+    version="0.0.2",
     author="Emrys Liu",
     author_email="emrys.liu@foxmail.com",  # 修复邮箱地址格式错误
     description="文件处理",

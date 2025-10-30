@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
+import platform
 
 
 class Store(ABC):
@@ -27,6 +28,7 @@ class Store(ABC):
         self.name = name
         self.root_path = Path(root_path)
         self.config = config
+        self.is_win = platform.system() == 'Windows'
         
     def get_path(self, rel_path: str|Path) -> Path:
         return self.root_path / rel_path

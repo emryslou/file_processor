@@ -64,6 +64,7 @@ def proc_files(config: dict):
                 result['info'][proc_type]['error'] = f"未找到处理函数 {fn_name}"
                 continue
             
+            logger.info(f"{driver} {proc_type} 扫描路径 {scan_path} 下符合 {proc_info['filter']} 的文件")
             procs_files = stores['dl']['store'].list(scan_path, proc_info['filter'])
             logger.info(f"{driver} {proc_type} 发现 {len(procs_files)} 个文件需要处理")
             logger.info(f"{driver} {proc_type} 需要处理的文件列表: {procs_files}")

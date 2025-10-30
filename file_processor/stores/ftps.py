@@ -96,6 +96,8 @@ class FTPSStore(Store):
         try:
             with open(local_path, 'rb') as f:
                 remote_path = Path(remote_path) / local_path.name
+                if self.is_win:
+                    remote_path = Path(remote_path).as_posix()
                 logger.info(f"上传文件 {local_path} 到 {remote_path}")
                 self.ftp.storbinary(f'STOR {remote_path}', f)
         except Exception as e:
@@ -111,6 +113,8 @@ class FTPSStore(Store):
             local_path (str|Path): 本地文件路径
         """
         try:
+            if self.is_win:
+                remote_path = Path(remote_path).as_posix()
             with open(local_path, 'wb') as f:
                 logger.info(f"下载文件 {remote_path} 到 {local_path}")
                 self.ftp.retrbinary(f'RETR {remote_path}', f.write)
@@ -127,6 +131,8 @@ class FTPSStore(Store):
             remote_path (str|Path): 远程存储路径
         """
         try:
+            if self.is_win:
+                remote_path = Path(remote_path).as_posix()
             self.ftp.delete(remote_path)
         except Exception as e:
             logger.exception(f"删除文件 {remote_path} 失败: {e}")
@@ -143,11 +149,13 @@ class FTPSStore(Store):
         Returns:
             list: 远程存储中的文件列表
         """
-        logger.info(f"列出远程路径 {remote_path} 中的文件，模式匹配 {pattern}")
+        logger.info(f"FTPS 列出远程路径 {remote_path} 中的文件，模式匹配 {pattern}")
         file_list = self.ftp.nlst('/')
-        logger.info(f"根目录文件列表: {file_list}")
-        
+        logger.info(f"FTPS 根目录文件列表: {file_list}")
+        if self.is_win:
+            remote_path = Path(remote_path).as_posix()
         file_list = self.ftp.nlst(remote_path)  # 避免使用内置函数名list作为变量名
+        logger.info(f"FTPS 列出 {remote_path} 中的文件，模式匹配: {pattern}: {file_list}")
         # 使用fnmatch进行真正的模糊匹配，只匹配文件名部分
         return [Path(remote_path) / Path(item) for item in file_list if fnmatch.fnmatch(Path(item).name, pattern)]
 
@@ -162,6 +170,8 @@ class FTPSStore(Store):
             bool: 文件是否存在
         """
         try:
+            if self.is_win:
+                remote_path = Path(remote_path).as_posix()
             self.ftp.size(remote_path)
             return True
         except:
@@ -174,6 +184,8 @@ class FTPSStore(Store):
         Args:
             remote_path (str|Path): 远程存储路径
         """
+        if self.is_win:
+            remote_path = Path(remote_path).as_posix()
         self.ftp.mkd(remote_path)
 
     def rmdir(self, remote_path: str|Path):
@@ -183,6 +195,8 @@ class FTPSStore(Store):
         Args:
             remote_path (str|Path): 远程存储路径
         """
+        if self.is_win:
+            remote_path = Path(remote_path).as_posix()
         self.ftp.rmd(remote_path)
 
     def rm(self, remote_path: str|Path):
@@ -192,6 +206,8 @@ class FTPSStore(Store):
         Args:
             remote_path (str|Path): 远程存储路径
         """
+        if self.is_win:
+            remote_path = Path(remote_path).as_posix()    
         self.ftp.delete(remote_path)
 
     def mv(self, src_path: str|Path, dst_path: str|Path):
@@ -202,6 +218,9 @@ class FTPSStore(Store):
             src_path (str|Path): 源文件路径
             dst_path (str|Path): 目标文件路径
         """
+        if self.is_win:
+            src_path = Path(src_path).as_posix()
+            dst_path = Path(dst_path).as_posix()
         self.ftp.rename(src_path, dst_path)
     
     def close(self):
