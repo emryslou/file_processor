@@ -163,7 +163,14 @@ class SFTPStore(Store):
         """
         if self.is_win:
             src_path = Path(src_path).as_posix()
+            dst_path = Path(dst_path).as_posix()
         self.sftp.rename(src_path, dst_path)
     
     def close(self):
-        pass
+        if self.sftp:
+            self.sftp.close()
+            self.sftp = None
+        if self.ssh_client:
+            self.ssh_client.close()
+            self.ssh_client = None
+        logger.info("SFTP 连接已关闭")

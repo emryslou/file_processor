@@ -167,4 +167,7 @@ class FTPStore(Store):
         self.ftp.rename(src_path, dst_path)
     
     def close(self):
-        pass
+        if self.ftp:
+            self.ftp.close()
+            self.ftp = None
+        logger.info("FTP 连接已关闭")

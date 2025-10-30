@@ -2,6 +2,7 @@ from loguru import logger
 from pathlib import Path
 from ..stores import create_store
 import pandas as pd
+from datetime import datetime
 
 
 def proc_t7_code_file(input_file: str|Path, output_dir: str|Path) -> Path:
@@ -155,7 +156,10 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
             # 将结果转换为25位二进制字符串（确保前导零）
             binary_result = format(subtitle_id_bin, '025b')
             # 去除日期字段开头的空格
-            new_row.iloc[0] = str(new_row.iloc[0]).strip()
+            cell_0 = datetime.strptime(str(new_row.iloc[0]).strip(), "%Y-%m-%d %H:%M:%S")
+            new_row.iloc[0] = f"{cell_0.year}/{cell_0.month}/{cell_0.day} {cell_0.hour}:{cell_0.minute:02d}:{cell_0.second:02d}"
+
+
             # 设置二进制结果
             new_row.iloc[result_column_idx] = binary_result
             new_df = pd.concat([new_df, pd.DataFrame([new_row], dtype=object)], ignore_index=True)

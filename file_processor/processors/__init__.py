@@ -1,4 +1,5 @@
 from tkinter import NO
+from webbrowser import get
 from file_processor.utils.config import processor as processor_config
 from file_processor.stores import create_store
 from file_processor.utils.logger import logger
@@ -10,6 +11,26 @@ _drivers = {
     'logic': logic,
     'dram': dram,
 }
+
+def get_proc_upload_path(proc_info: dict, ul_path: dict):
+    """获取处理函数的上传路径
+
+    Args:
+        proc_info (dict): 处理类型配置
+        stores (dict): 存储配置
+
+    Returns:
+        str: 处理函数的上传路径
+    """
+
+    path = ul_path['path']
+    proc_path = proc_info.get('ul_path', None)
+    if proc_path:
+        logger.info(f"{proc_info['type']} 已设置上传路径: {proc_path}，替换默认: {path}")
+        path = proc_path
+    else:
+        logger.info(f"{proc_info['type']} 未找到上传路径，使用默认路径:{path}")
+    return path
 
 def proc_files(config: dict):
     """处理 文件的逻辑函数
@@ -72,6 +93,7 @@ def proc_files(config: dict):
                 'files': procs_files, 'success': {}, 'error': {},
             }
 
+            proc_ul_path = get_proc_upload_path(proc_info, stores['ul']['config'])
             for input_file in procs_files:
                 try:
                     remote_file = stores['dl']['store'].get_path(input_file)
@@ -82,7 +104,7 @@ def proc_files(config: dict):
                     output_file = fn(input_file, tmp_path)
                     
                     # 上传到 ul_path
-                    stores['ul']['store'].upload(output_file, stores['ul']['store'].get_path(stores['ul']['config']['path']))
+                    stores['ul']['store'].upload(output_file, stores['ul']['store'].get_path(proc_ul_path))
                     logger.info(f"{driver} 文件 {input_file} 处理完成, 处理后的文件: {output_file}")
 
                     # 备份到 bak_path   
