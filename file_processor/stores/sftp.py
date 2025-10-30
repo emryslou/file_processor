@@ -173,4 +173,4 @@ class SFTPStore(Store):
         if self.ssh_client:
             self.ssh_client.close()
             self.ssh_client = None
-        logger.info("SFTP 连接已关闭")
+        logger.info(f"SFTP 连接已关闭(host: {self.host}, port: {self.port})")

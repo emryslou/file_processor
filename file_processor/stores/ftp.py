@@ -170,4 +170,4 @@ class FTPStore(Store):
         if self.ftp:
             self.ftp.close()
             self.ftp = None
-        logger.info("FTP 连接已关闭")
+        logger.info(f"FTP 连接已关闭(host: {self.host}, port: {self.port})")

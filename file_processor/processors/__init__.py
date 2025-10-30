@@ -12,24 +12,25 @@ _drivers = {
     'dram': dram,
 }
 
-def get_proc_upload_path(proc_info: dict, ul_path: dict):
+def get_proc_path(path_type: str, proc_info: dict, srv_path: dict):
     """获取处理函数的上传路径
 
     Args:
+        path_type (str): 路径类型，ul_path 或 dl_path
         proc_info (dict): 处理类型配置
-        stores (dict): 存储配置
+        srv_path (dict): 存储配置
 
     Returns:
         str: 处理函数的上传路径
     """
 
-    path = ul_path['path']
-    proc_path = proc_info.get('ul_path', None)
+    path = srv_path['path']
+    proc_path = proc_info.get(path_type, None)
     if proc_path:
-        logger.info(f"{proc_info['type']} 已设置上传路径: {proc_path}，替换默认: {path}")
+        logger.info(f"{proc_info['type']} 已设置{path_type}: {proc_path}，替换默认: {path}")
         path = proc_path
     else:
-        logger.info(f"{proc_info['type']} 未找到上传路径，使用默认路径:{path}")
+        logger.info(f"{proc_info['type']} 未找到{path_type}，使用默认路径:{path}")
     return path
 
 def proc_files(config: dict):
@@ -62,7 +63,7 @@ def proc_files(config: dict):
         }
 
         result['status'] = 'scan_path'
-        scan_path = stores['dl']['store'].get_path(stores['dl']['config']['path'])
+        # scan_path = stores['dl']['store'].get_path(stores['dl']['config']['path'])
         tmp_path = Path('data/tmp/') / driver
         if not tmp_path.exists():
             tmp_path.mkdir(parents=True)
@@ -85,6 +86,8 @@ def proc_files(config: dict):
                 result['info'][proc_type]['error'] = f"未找到处理函数 {fn_name}"
                 continue
             
+            
+            scan_path = stores['dl']['store'].get_path(get_proc_path('dl_path', proc_info, stores['dl']['config']))
             logger.info(f"{driver} {proc_type} 扫描路径 {scan_path} 下符合 {proc_info['filter']} 的文件")
             procs_files = stores['dl']['store'].list(scan_path, proc_info['filter'])
             logger.info(f"{driver} {proc_type} 发现 {len(procs_files)} 个文件需要处理")
@@ -93,7 +96,8 @@ def proc_files(config: dict):
                 'files': procs_files, 'success': {}, 'error': {},
             }
 
-            proc_ul_path = get_proc_upload_path(proc_info, stores['ul']['config'])
+            proc_ul_path = get_proc_path('ul_path', proc_info, stores['ul']['config'])
+
             for input_file in procs_files:
                 try:
                     remote_file = stores['dl']['store'].get_path(input_file)
