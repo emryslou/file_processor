@@ -21,7 +21,7 @@ def proc_t7_code_file(input_file: str|Path, output_dir: str|Path) -> Path:
         # 指定header=None，避免将第一行作为表头
         # 指定dtype=str，保持所有数据的原始格式，避免自动格式化日期
         df = pd.read_excel(input_file, header=None, dtype=str) 
-        lot_id = df.iloc[2, 1]
+        lot_id = df.iloc[3, 1]
         
         # 从第5行开始，逐行复制，知道第一列为的值为 Spec USL 为止
         start_row = 5 # 因为第4行是表头，所以从第5行开始复制
@@ -72,10 +72,11 @@ def proc_coa_file(input_file: str|Path, output_dir: str|Path) -> Path:
         # 指定header=None，避免将第一行作为表头
         # 指定dtype=str，保持所有数据的原始格式，避免自动格式化日期
         df = pd.read_excel(input_file, header=None, dtype=str) 
-        lot_id = df.iloc[2, 1]
+        lot_id = df.iloc[3, 1]
 
         new_df = df.copy()
         new_df.iloc[3, :] = ''
+        new_df.iloc[2, 1] = lot_id
 
         output_file = Path(output_dir) / f"COA_{lot_id}.csv"
         # 添加header=False，避免输出表头行
@@ -104,7 +105,7 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
         logger.info(f"Dram APC 文件开始转换, 源文件: {input_file}")
         
         df = pd.read_excel(input_file)
-        lot_id = df.iloc[0, 2]
+        lot_id = df.iloc[0, 1]
 
         new_colums = [
             df.columns[0],
@@ -119,7 +120,7 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
         item_column = df.columns[8]   # 包含XXX{n}格式数据的列
         result_column_idx = 7         # 存储二进制结果的列索引
 
-        for key, items in df.groupby(group_column, sort=False):
+        for _key, items in df.groupby(group_column, sort=False):
             # 初始化二进制结果为25位0
             subtitle_id_bin = 0
             
@@ -166,6 +167,8 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
             
         
         output_file = Path(output_dir) / f"APC_{lot_id}.xlsx"
+        # 使用rename方法修改第二列的列名
+        new_df = new_df.rename(columns={new_df.columns[1]: 'LOT_ID'})
         new_df.to_excel(output_file, index=False)
         logger.info(f"Dram APC 文件转换完成, 源文件: {input_file}, 处理后的文件: {output_file}")
         return output_file
