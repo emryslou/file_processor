@@ -208,7 +208,8 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
                         logger.error(f"第 {idx+1} 行参数: {old_item.tolist()}")
                         logger.error(f"第 {idx+2} 行参数: {items.iloc[idx, 6:].tolist()}")
                         raise ValueError(f"{layer_id} 的参数有差异不能合并")
-                subtitle_id_bin |= (1 << (24 - int(str(item)[-2:]) - 1))
+                logger.info(f"第 {idx+1} 行参数: {item}")
+                subtitle_id_bin |= (1 << (24 - (int(str(item)[-2:]) - 1)))
             
             # 使用iloc明确按位置设置值，避免pandas FutureWarning
             new_row.iloc[substrate_id_idx] = format(subtitle_id_bin, '025b')
@@ -223,6 +224,6 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
         logger.info(f"Logic APC 文件转换完成, 源文件: {input_file}, 处理后的文件: {out_file}")
         return out_file
     except Exception as e:
-        logger.error(f"Logic APC 文件转换失败：{e}")
+        logger.exception(f"Logic APC 文件转换失败：{e}")
         raise e
     

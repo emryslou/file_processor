@@ -41,6 +41,7 @@ setup(
         'loguru == 0.7.3',
         'pyyaml == 6.0.3',
         'paramiko == 4.0.0',
+        'xlrd == 2.0.1',
     ],
     entry_points={
         "console_scripts": [
