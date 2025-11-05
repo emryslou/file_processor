@@ -1,15 +1,68 @@
 # File Processor
-文件处理器
 
-# 功能描述
-1. 配置支持 yml
-2. 通知方式: 邮件
-3. 日志记录: 支持 控制台 与 文件 记录
-4. 文件处理器: 支持 多文件处理器
-5. 文件下载, 上传，备份支持:
-    ftp, sftp, ftp, local (本机目录)
+## 功能描述
+1. 下载远程文件到本地
+2. 处理文件
+3. 上传处理后的文件到远程
+4. 备份原始文件到远程
+5. 支持 处理 xls, xlsx 文件
+6. 支持存储类型: local (本地文件系统), ftp, ftps, sftp
+7. 支持 处理 t7_code, coa, apc 等处理方式
+8. 处理器: 支持 逻辑处理器 (logic) 和 内存处理器 (dram)
 
-# 使用说明
+
+## 版本更新
+## 0.0.2-rc2
+1. 修复 store 资源回收问题
+
+## 0.0.2-rc1
+1. 修改 dram apc: lot_id 取值方式
+2. logic apc: subtitle_id 计算方式优化
+3. 支持 处理 xls 文件
+
+## 项目结构
+```
+file_processor
+├── README.md
+├── file_processor
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── cli.py
+│   ├── meta
+│   │   ├── changelog.md
+│   │   ├── example.yml
+│   │   ├── package_structure.txt
+│   │   └── readme.tpl.md
+│   ├── notification
+│   │   ├── __init__.py
+│   │   └── email.py
+│   ├── processors
+│   │   ├── __init__.py
+│   │   ├── dram.py
+│   │   └── logic.py
+│   ├── stores
+│   │   ├── __init__.py
+│   │   ├── ftp.py
+│   │   ├── ftps.py
+│   │   ├── local.py
+│   │   ├── sftp.py
+│   │   └── store.py
+│   └── utils
+│       ├── config.py
+│       └── logger.py
+├── scripts
+│   ├── build.sh
+│   ├── proxy.sh
+│   └── tools.py
+├── setup.py
+└── tests
+    └── test_ftp_match.py
+
+9 directories, 26 files
+
+```
+
+## 使用说明
 1. 系统组件需求: Python >= 3.9
 2. 建议安装 Python 3.11 环境， 下面是下载地址:
    - x64: https://www.python.org/ftp/python/3.11.1/python-3.11.1-amd64.exe
@@ -36,53 +89,59 @@ Options:
 version: 1.0.0
 app:
   stores: # 存储配置
-    - name: ftp_store # 存储名称: 随意，但不能重复，不要出现特殊字符，格式为: 英文字母和下划线
-      type: ftp # 存储类型: 支持 ftp，ftps, sftp, local (本地文件)
-      root_path: /应用文件-xunlei/data/data # 根目录: 后面的目录会自动附加上这个目录， 切记
+    - name: ftp_store # 存储名称 -------------------------------- FTP Start ----------------------------
+      type: ftp # 可选项: local, ftp, ftps, sftp
+      root_path: /path
+      host: 192.168.1.27
+      port: 2121 # FTP端口
+      user: admin
+      password: 'password'
+      encoding: utf-8 # -------------------------------- FTP End ----------------------------
+    - name: sftp_store # 存储名称 -------------------------------- SFTP Start ----------------------------
+      type: sftp # 存储类型
+      root_path: /vol2/@appshare/xunlei/data/data
+      host: 192.168.1.27
+      port: 22
+      user: admin
+      password: 'Abcd1234'
+      encoding: utf-8 # -------------------------------- SFTP End ----------------------------
+    - name: ftps_store # 存储名称 -------------------------------- FTPS Start ----------------------------
+      type: ftps # 存储类型
+      root_path: /应用文件-xunlei/data/data
       host: 192.168.1.27
       port: 2121 # FTP端口
       user: admin
       password: 'Abcd1234'
-      encoding: utf-8
-    # - name: sftp_store # 存储名称
-    #   type: sftp # 存储类型
-    #   root_path: /vol2/@appshare/xunlei/data
-    #   host: 192.168.1.27
-    #   port: 22
-    #   user: admin
-    #   password: 'Abcd1234'
-    #   encoding: utf-8
-    # - name: ftps_store # 存储名称
-    #   type: ftps # 存储类型
-    #   root_path: /应用文件-xunlei/data/data
-    #   host: 192.168.1.27
-    #   port: 2121 # FTP端口
-    #   user: admin
-    #   password: 'Abcd1234'
-    #   encoding: utf-8
-    # - name: local_store # 存储名称
-    #   type: local # 存储类型
-    #   root_path: data/ # 根目录
+      encoding: utf-8 # -------------------------------- FTPS End ----------------------------  
+    - name: local_store # 存储名称 -------------------------------- Local Start ----------------------------
+      type: local # 存储类型
+      root_path: data/ # 根目录 # -------------------------------- Local End ----------------------------
   processors:
-    - driver: dram # 仅支持 dram, logic
+    - driver: dram # 处理器驱动, dram 或 logic -------------------------------- Dram Start ----------------------------
       name: dram_processor
-      dl_path: # 下载路径
-        store: sftp/sftp_store # 存储: 存储类型/存储名称, stores 中 {type}/{name}
-        path: dram/dl # 具体路径, 相对路径，实际为 {store的root_path}/{这里定义的路径}
-      bak_path: # 备份路径，
-        store: sftp/sftp_store # 存储类型/存储名称，最好和 dl_path 一致
+      dl_path: # 下载路径, 或被覆盖或者指定
+        store: ftps/ftps_store # 存储类型/存储名称
+        path: dram/dl # 下载路径
+      bak_path: # 备份路径
+        store: ftps/ftps_store # 存储类型/存储名称
         path: dram/bak # 备份路径
-      ul_path: # 上传路径
-        store: sftp/sftp_store # 存储类型/存储名称
-        path: dram/upload # 上传路径
+      ul_path: # 上传路径, 或被覆盖或者指定
+        store: ftps/ftps_store # 存储类型/存储名称
+        path: dram/upload # 上传路径, 或被覆盖或者指定
       proc_types: # 处理类型
         - type: t7_code # T7Code文件处理
-          filter: 'COA*.xlsx' # 匹配COA*.xlsx文件
+          filter: 't7_code*.xlsx' # 匹配t7_code*.xlsx文件
+          dl_path: dram/dl/t7_code # 下载路径, 或被覆盖或者指定
+          ul_path: dram/upload/t7_code
         - type: coa # COA文件处理
           filter: 'COA*.xlsx' # 匹配COA*.xlsx文件
+          dl_path: dram/dl/coa # 下载路径, 或被覆盖或者指定 
+          ul_path: dram/upload/coa
         - type: apc # APC文件处理
-          filter: '*APC*.xlsx' # 匹配*APC*.xlsx文件 
-    - driver: logic # logic
+          filter: '*APC*.xlsx' # 匹配*APC*.xlsx文件
+          dl_path: dram/dl/apc # 下载路径, 或被覆盖或者指定 
+          ul_path: dram/upload/apc # 上传路径 ，相对于 store.root_path, 会覆盖 url.path ----- -------------------------------- Dram End ----------------------------
+    - driver: logic # 处理器驱动, dram 或 logic -------------------------------- Logic Start ----------------------------
       name: logic_processor # 逻辑处理器
       dl_path: 
         store: ftp/ftp_store # 本机存储/存储名称
@@ -99,15 +158,15 @@ app:
         - type: coa # COA文件处理
           filter: 'T7Code*.xlsx' # 匹配T7Code*.xlsx文件
         - type: apc # APC文件处理
-          filter: 'APC*.xlsx' # 匹配APC*.xlsx文件
-  logger: # 保持现状即可
-    log_level: info
+          filter: 'APC*.xlsx' # 匹配APC*.xlsx文件 -------------------------------- Logic End ----------------------------
+  logger:
+    log_level: debug
     log_file: data/log/file_processor.log
     log_rotate: 10 MB
     log_backtrace: true
-  
-  notification: # 通知
-    - type: email  # 固定
+    console_output: true
+  notification:
+    - type: email      
       subject: "文件处理报告"     # 邮件主题
       sender: "emrys.liu@foxmail.com"  # 发送者邮箱
       recipients:                       # 接收者邮箱列表
@@ -116,5 +175,5 @@ app:
       smtp_server: "smtp.qq.com"   # SMTP服务器地址
       smtp_port: 465                    # SMTP服务器端口
       smtp_username: "emrys.liu@foxmail.com"  # SMTP用户名
-      smtp_password: "xxxxx"    # SMTP密码或授权码
+      smtp_password: "password_or_authorization_code"    # SMTP密码或授权码
 ```

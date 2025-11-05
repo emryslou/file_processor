@@ -74,9 +74,35 @@ def read_package_structure():
     with open(os.path.join(META_PATH, 'package_structure.txt'), 'r', encoding='utf-8') as f:
         return f.read()
 
+def generate_readme():
+    """生成README.md文件
+    """
+    with open(os.path.join(META_PATH, 'readme.tpl.md'), 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    # 功能描述
+    content = content.replace('{{meta/changelog.md#功能描述}}', '\n'.join(read_changelog_desc()))
+    # 版本更新
+    content = content.replace('{{meta/changelog.md#版本更新}}', '\n'.join(read_changelog_version_update()))
+    # example.yml
+    content = content.replace('{{meta/example.yml}}', read_example_cfg())
+    # 项目结构
+    content = content.replace('{{meta/package_structure}}', read_package_structure())
+
+    # 写回文件
+    with open(os.path.join(ROOT_PATH, 'README.md'), 'w', encoding='utf-8') as f:
+        f.write(content)
+
 
 if __name__ == '__main__':
-    print('\n'.join(read_changelog_desc()))
-    print('\n'.join(read_changelog_version_update()))
-    
-    print('\n'.join(read_changelog_version_update('0.0.2-rc2')))
+    import sys
+
+    sub_cmd = 'generate_readme'
+    if len(sys.argv) > 1:
+        sub_cmd = sys.argv[1]
+    match sub_cmd:
+        case 'generate_readme':
+            print('generate_readme')
+            generate_readme()
+        case _:
+            print(f'Unknown sub command: {sub_cmd}')
