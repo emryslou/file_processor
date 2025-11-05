@@ -5,6 +5,7 @@ from file_processor.stores.local import LocalStore as _LocalStore
 from file_processor.stores.ftp import FTPStore as _FTPStore
 from file_processor.stores.ftps import FTPSStore as _FTPSStore
 from file_processor.stores.sftp import SFTPStore as _SFTPStore
+from file_processor.utils.logger import logger
 
 
 def create_store(store: str) -> Store:
@@ -22,3 +23,11 @@ def create_store(store: str) -> Store:
 
     raise ValueError(f"未支持的存储类型 {_type}")
 
+
+def destroy_stores():
+    for store_name, store_instaince in Store.__instances__.items():
+        try:
+            store_instaince.close()
+            logger.info(f"回收存储资源: {store_instaince.__type__}/{store_name} 成功")            
+        except Exception as e:
+            logger.error(f"回收存储资源: {store_instaince.__type__}/{store_name} 时出错: {e}")

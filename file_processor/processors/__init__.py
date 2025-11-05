@@ -133,9 +133,6 @@ def proc_files(config: dict):
         result['status'] = f"{result['status']}_error"
         result['message'] = f"处理文件 {driver} 时出错: " + str(e)  
     finally:
-        if stores:
-            for store in stores.values():
-                store['store'].close()
         return result
 
 

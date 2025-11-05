@@ -1,0 +1,90 @@
+version: 1.0.0
+app:
+  stores: # 存储配置
+    - name: ftp_store # 存储名称
+      type: ftp # 可选项: local, ftp, ftps, sftp
+      root_path: /path
+      host: 192.168.1.27
+      port: 2121 # FTP端口
+      user: admin
+      password: 'password'
+      encoding: utf-8
+    - name: sftp_store # 存储名称
+      type: sftp # 存储类型
+      root_path: /vol2/@appshare/xunlei/data/data
+      host: 192.168.1.27
+      port: 22
+      user: admin
+      password: 'Abcd1234'
+      encoding: utf-8
+    - name: ftps_store # 存储名称
+      type: ftps # 存储类型
+      root_path: /应用文件-xunlei/data/data
+      host: 192.168.1.27
+      port: 2121 # FTP端口
+      user: admin
+      password: 'Abcd1234'
+      encoding: utf-8
+    - name: local_store # 存储名称
+      type: local # 存储类型
+      root_path: data/ # 根目录
+  processors:
+    - driver: dram # 处理器驱动, dram 或 logic
+      name: dram_processor
+      dl_path: # 下载路径, 或被覆盖或者指定
+        store: ftps/ftps_store # 存储类型/存储名称
+        path: dram/dl # 下载路径
+      bak_path: # 备份路径
+        store: ftps/ftps_store # 存储类型/存储名称
+        path: dram/bak # 备份路径
+      ul_path: # 上传路径, 或被覆盖或者指定
+        store: ftps/ftps_store # 存储类型/存储名称
+        path: dram/upload # 上传路径, 或被覆盖或者指定
+      proc_types: # 处理类型
+        - type: t7_code # T7Code文件处理
+          filter: 't7_code*.xlsx' # 匹配t7_code*.xlsx文件
+          dl_path: dram/dl/t7_code # 下载路径, 或被覆盖或者指定
+          ul_path: dram/upload/t7_code
+        - type: coa # COA文件处理
+          filter: 'COA*.xlsx' # 匹配COA*.xlsx文件
+          dl_path: dram/dl/coa # 下载路径, 或被覆盖或者指定 
+          ul_path: dram/upload/coa
+        - type: apc # APC文件处理
+          filter: '*APC*.xlsx' # 匹配*APC*.xlsx文件
+          dl_path: dram/dl/apc # 下载路径, 或被覆盖或者指定 
+          ul_path: dram/upload/apc # 上传路径 ，相对于 store.root_path, 会覆盖 url.path -----
+    # - driver: logic
+    #   name: logic_processor # 逻辑处理器
+    #   dl_path: 
+    #     store: ftp/ftp_store # 本机存储/存储名称
+    #     path: logic/dl # 下载路径
+    #   ul_path: 
+    #     store: ftp/ftp_store # 本机存储/存储名称
+    #     path: logic/upload # 上传路径
+    #   bak_path: 
+    #     store: ftp/ftp_store # 本机存储/存储名称
+    #     path: logic/bak # 备份路径
+    #   proc_types: # 处理类型
+    #     - type: t7_code # T7Code文件处理
+    #       filter: 'T7Code*.xlsx' # 匹配T7Code*.xlsx文件
+    #     - type: coa # COA文件处理
+    #       filter: 'T7Code*.xlsx' # 匹配T7Code*.xlsx文件
+    #     - type: apc # APC文件处理
+    #       filter: 'APC*.xlsx' # 匹配APC*.xlsx文件
+  logger:
+    log_level: debug
+    log_file: data/log/file_processor.log
+    log_rotate: 10 MB
+    log_backtrace: true
+    console_output: true
+  notification:
+    - type: email      
+      subject: "文件处理报告"     # 邮件主题
+      sender: "emrys.liu@foxmail.com"  # 发送者邮箱
+      recipients:                       # 接收者邮箱列表
+        - "emrys.liu@foxmail.com"
+        # - "recipient2@example.com"
+      smtp_server: "smtp.qq.com"   # SMTP服务器地址
+      smtp_port: 465                    # SMTP服务器端口
+      smtp_username: "emrys.liu@foxmail.com"  # SMTP用户名
+      smtp_password: "password_or_authorization_code"    # SMTP密码或授权码

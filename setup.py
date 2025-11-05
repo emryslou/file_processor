@@ -1,5 +1,7 @@
 from setuptools import setup, find_packages
 import os
+from file_processor import __version__, __author__, __author_email__
+
 
 
 # 确保当前目录正确
@@ -7,9 +9,9 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name="file_processor",
-    version="0.0.2-rc1",
-    author="Emrys Liu",
-    author_email="emrys.liu@foxmail.com",  # 修复邮箱地址格式错误
+    version=__version__,
+    author=__author__,
+    author_email=__author_email__,  # 修复邮箱地址格式错误
     description="文件处理",
     long_description="""Demo""",
     long_description_content_type="text/markdown",
@@ -24,14 +26,12 @@ setup(
     include_package_data=True,
     # 明确指定包数据
     package_data={
-        '': ['*.md', '*.txt'],  # 包含根目录下的所有md和txt文件
+        '': ['*.md', '*.txt', '*.yml'],  # 包含根目录下的所有md和txt文件
     },
     # 指定额外的数据文件
     data_files=[
         # 安装readme.md和changelog.md到文档目录
         # 确保在Windows上也能正确处理路径
-        (os.path.join('share', 'doc', 'file_processor') if os.name == 'nt' else 'share/doc/file_processor', 
-         ['readme.md', 'changelog.md'])
     ],
     install_requires=[
         'click == 8.3.0',

@@ -1,10 +1,10 @@
 import click
-import sys
 from pathlib import Path
 
 from file_processor.utils.config import load_config
 from file_processor.utils.logger import logger, init_logger
 from file_processor.processors import proc_files
+from file_processor.stores import destroy_stores
 
 @click.command("file-processor")
 @click.option("--config", "-c", required=True, help="配置文件路径", type=click.Path(exists=True))
@@ -23,8 +23,12 @@ def cli(config: str|Path):
         },
         'config': config,
     }
-    for processor in processors:
-        result_info['processor'][processor['driver']] = proc_files(processor)
+    try:
+        for processor in processors:
+            result_info['processor'][processor['driver']] = proc_files(processor)
+    finally:
+        logger.info("回收所有存储资源")
+        destroy_stores()
     
     if notify_types:
         from file_processor.notification import send_notification, gen_notification_body_html

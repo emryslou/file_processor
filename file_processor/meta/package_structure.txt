@@ -1,0 +1,36 @@
+file_processor
+├── README.md
+├── file_processor
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── cli.py
+│   ├── meta
+│   │   ├── changelog.md
+│   │   ├── example.yml
+│   │   ├── package_structure.txt
+│   │   └── readme.tpl.md
+│   ├── notification
+│   │   ├── __init__.py
+│   │   └── email.py
+│   ├── processors
+│   │   ├── __init__.py
+│   │   ├── dram.py
+│   │   └── logic.py
+│   ├── stores
+│   │   ├── __init__.py
+│   │   ├── ftp.py
+│   │   ├── ftps.py
+│   │   ├── local.py
+│   │   ├── sftp.py
+│   │   └── store.py
+│   └── utils
+│       ├── config.py
+│       └── logger.py
+├── scripts
+│   ├── build.sh
+│   └── proxy.sh
+├── setup.py
+└── tests
+    └── test_ftp_match.py
+
+9 directories, 25 files
