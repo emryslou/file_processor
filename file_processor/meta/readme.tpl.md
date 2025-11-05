@@ -3,6 +3,14 @@
 ## 功能描述
 {{meta/changelog.md#功能描述}}
 
+## 版本更新
+{{meta/changelog.md#版本更新}}
+
+## 项目结构
+```
+{{meta/package_structure}}
+```
+
 ## 使用说明
 1. 系统组件需求: Python >= 3.9
 2. 建议安装 Python 3.11 环境， 下面是下载地址:
