@@ -1,3 +1,3 @@
-from file_processor.cli import cli
+from file_processor.cli import cli, client
 
-cli()
+client()   

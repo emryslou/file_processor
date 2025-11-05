@@ -29,6 +29,7 @@ file_processor
 │   ├── __main__.py
 │   ├── cli.py
 │   ├── meta
+│   │   ├── __init__,py
 │   │   ├── changelog.md
 │   │   ├── example.yml
 │   │   ├── package_structure.txt
@@ -58,7 +59,7 @@ file_processor
 └── tests
     └── test_ftp_match.py
 
-9 directories, 26 files
+9 directories, 27 files
 
 ```
 

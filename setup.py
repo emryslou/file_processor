@@ -16,23 +16,12 @@ setup(
     long_description="""Demo""",
     long_description_content_type="text/markdown",
     url="https://github.com/emryslou/file_processor",  # 替换为实际仓库地址
-    packages=[
-        'file_processor',
-        'file_processor.notification',
-        'file_processor.processors',
-        'file_processor.stores',
-        'file_processor.utils'
-    ],  # 显式列出所有包
-    include_package_data=True,
+    packages=find_packages(include=['file_processor']),
+    package_dir={'file_processor': 'file_processor'},
     # 明确指定包数据
     package_data={
-        '': ['*.md', '*.txt', '*.yml'],  # 包含根目录下的所有md和txt文件
+        'data': ['file_processor/meta/*.md', 'file_processor/meta/*.txt', 'file_processor/meta/*.yml'],
     },
-    # 指定额外的数据文件
-    data_files=[
-        # 安装readme.md和changelog.md到文档目录
-        # 确保在Windows上也能正确处理路径
-    ],
     install_requires=[
         'click == 8.3.0',
         'numpy >= 1.24.0, < 2.0.0',  # 添加numpy依赖并指定版本范围
@@ -45,7 +34,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "file_processor = file_processor.cli:cli",
+            "file_processor = file_processor.cli:client",
         ],
     },
     classifiers=[
