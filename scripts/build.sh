@@ -6,6 +6,8 @@ tree $dirname -I dist -I __pycache__ -I dist -I build -I *.egg-info -I config -I
 sed -i "s#$dirname#$project_name#g" $dirname/$project_name/meta/package_structure.txt > $dirname/$project_name/meta/$project_name.txt
 rm $dirname/$project_name/meta/$project_name.txt
 
+# 打包时间
+python -c "import scripts.tools as tools; tools.generate_package_time()"
 
 # 生成 README.md 文件
 python -c "import scripts.tools as tools; tools.generate_readme()"

@@ -93,6 +93,14 @@ def generate_readme():
     with open(os.path.join(ROOT_PATH, 'README.md'), 'w', encoding='utf-8') as f:
         f.write(content)
 
+def generate_package_time():
+    """生成package_time.txt文件
+    """
+    from datetime import datetime
+    with open(os.path.join(META_PATH, 'package_time.txt'), 'w', encoding='utf-8') as f:
+        f.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+
 
 if __name__ == '__main__':
     import sys

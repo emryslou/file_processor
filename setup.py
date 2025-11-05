@@ -16,11 +16,11 @@ setup(
     long_description="""Demo""",
     long_description_content_type="text/markdown",
     url="https://github.com/emryslou/file_processor",  # 替换为实际仓库地址
-    packages=find_packages(include=['file_processor']),
+    packages=find_packages(include=['file_processor', 'file_processor.*']),
     package_dir={'file_processor': 'file_processor'},
     # 明确指定包数据
     package_data={
-        'data': ['file_processor/meta/*.md', 'file_processor/meta/*.txt', 'file_processor/meta/*.yml'],
+        'file_processor': ['meta/*.md', 'meta/*.txt', 'meta/*.yml'],
     },
     install_requires=[
         'click == 8.3.0',
