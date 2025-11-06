@@ -73,10 +73,16 @@ app:
       proc_types: # 处理类型
         - type: t7_code # T7Code文件处理
           filter: 'T7Code*.xlsx' # 匹配T7Code*.xlsx文件
+          dl_path: dram/dl/t7_code # 下载路径, 或被覆盖或者指定
+          ul_path: dram/upload/t7_code
         - type: coa # COA文件处理
-          filter: 'T7Code*.xlsx' # 匹配T7Code*.xlsx文件
+          filter: 'COA*.xlsx' # 匹配COA*.xlsx文件
+          dl_path: dram/dl/coa # 下载路径, 或被覆盖或者指定 
+          ul_path: dram/upload/coa
         - type: apc # APC文件处理
-          filter: 'APC*.xlsx' # 匹配APC*.xlsx文件 -------------------------------- Logic End ----------------------------
+          filter: 'APC*.xlsx' # 匹配APC*.xlsx文件
+          dl_path: dram/dl/apc # 下载路径, 或被覆盖或者指定 
+          ul_path: dram/upload/apc # 上传路径 ，相对于 store.root_path, 会覆盖 url.path -------------------------------- Logic End ----------------------------
   logger:
     log_level: debug
     log_file: data/log/file_processor.log

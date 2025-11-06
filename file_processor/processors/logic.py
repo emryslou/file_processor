@@ -1,5 +1,6 @@
 from pathlib import Path
 import pandas as pd
+from datetime import datetime
 
 from file_processor.stores import create_store
 from file_processor.utils.logger import logger
@@ -135,7 +136,8 @@ def proc_coa_file(input_file: str|Path, output_dir: str|Path) -> Path:
         row_number = 5
         for i in range(old_df.shape[0]):
             # # 第5行第1列: 源文件的第3列,
-            new_df.iloc[row_number+i, 0] = str(old_df.iloc[i, 2]) # .replace(lot_id, '')
+            # Fix Issue: Fix: logic的COA文件中的wafer ID，需要的格式是KPB425_02，不是KPB425#02, 即替换 # 为 _
+            new_df.iloc[row_number+i, 0] = str(old_df.iloc[i, 2]).replace('#', '_')
             # # 第5行第2列: 源文件的第2列,
             new_df.iloc[row_number+i, 1] = old_df.iloc[i, 1]
             # # 第5行剩余列：值均为 'Pass'
@@ -194,6 +196,7 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
         substrate_id_idx = new_columns.index('SUBSTRATE_ID')
         machine_type_idx = new_columns.index('MACHINE_TYPE')
         equipment_id_idx = new_columns.index('EQUIPMENT_ID')
+        reply_dtts_idx = new_columns.index('REPLY_DTTS')
         reticle_idx = new_columns.index('RETICLE')
         for layer_id, items in old_df.groupby(old_df.columns[3], sort=False):
             new_row =  items.iloc[0].copy().reindex(new_columns)
@@ -211,11 +214,15 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
                 logger.info(f"第 {idx+1} 行参数: {item}")
                 subtitle_id_bin |= (1 << (24 - (int(str(item)[-2:]) - 1)))
             
-            # 使用iloc明确按位置设置值，避免pandas FutureWarning
+            #  Fix: logic的APC文件，REPLY_DTTS对应的日期，要和Dram一样，是2025/9/29 03:43:00这种，不要自定义的2025-09-29 03:43:00 @dukang
+            cell_0 = datetime.strptime(str(new_row.iloc[reply_dtts_idx]).strip(), "%Y-%m-%d %H:%M:%S")
+            new_row.iloc[reply_dtts_idx] = f"{cell_0.year}/{cell_0.month}/{cell_0.day} {cell_0.hour}:{cell_0.minute:02d}:{cell_0.second:02d}"
+            
             new_row.iloc[substrate_id_idx] = format(subtitle_id_bin, '025b')
             new_row.iloc[machine_type_idx] = 'ASML'
             new_row.iloc[equipment_id_idx] = match(layer_id, {127: 'KPIKF01', 286: 'KPIKF02'})
             new_row.iloc[reticle_idx] = match(layer_id, {127: '0CSN00127AA1', 286: '0CSN00286AA1'})
+            logger.debug(f"第 {idx+1} 行参数: {new_row.tolist()}, old_item: {items.iloc[:, 0].tolist()}")
             new_df.loc[len(new_df)] = new_row
 
         out_file = Path(output_dir) / f"APC_{lot_id}.xlsx"
