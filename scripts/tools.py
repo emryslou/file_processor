@@ -101,6 +101,11 @@ def generate_package_time():
         f.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
+def remove_package_time():
+    """删除package_time.txt文件
+    """
+    os.remove(os.path.join(META_PATH, 'package_time.txt'))
+
 
 if __name__ == '__main__':
     import sys
@@ -112,5 +117,8 @@ if __name__ == '__main__':
         case 'generate_readme':
             print('generate_readme')
             generate_readme()
+        case 'remove_package_time':
+            print('remove_package_time')
+            remove_package_time()
         case _:
             print(f'Unknown sub command: {sub_cmd}')

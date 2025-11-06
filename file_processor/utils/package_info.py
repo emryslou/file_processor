@@ -66,4 +66,4 @@ def package_time() -> str:
         return pkgutil.get_data('file_processor', 'meta/package_time.txt').decode('utf-8').strip()
     except:
         from datetime import datetime
-        return datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' (未打包)'
+        return datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' (开发中)'

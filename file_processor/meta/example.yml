@@ -58,12 +58,18 @@ app:
       dl_path: 
         store: ftp/ftp_store # 本机存储/存储名称
         path: logic/dl # 下载路径
+        dl_path: dram/dl/coa # 下载路径, 或被覆盖或者指定 
+        ul_path: dram/upload/coa # 上传路径, 或被覆盖或者指定
       ul_path: 
         store: ftp/ftp_store # 本机存储/存储名称
         path: logic/upload # 上传路径
+        dl_path: dram/dl/coa # 下载路径, 或被覆盖或者指定 
+        ul_path: dram/upload/coa # 上传路径, 或被覆盖或者指定
       bak_path: 
         store: ftp/ftp_store # 本机存储/存储名称
         path: logic/bak # 备份路径
+        dl_path: dram/dl/coa # 下载路径, 或被覆盖或者指定 
+        ul_path: dram/upload/coa # 上传路径, 或被覆盖或者指定
       proc_types: # 处理类型
         - type: t7_code # T7Code文件处理
           filter: 'T7Code*.xlsx' # 匹配T7Code*.xlsx文件

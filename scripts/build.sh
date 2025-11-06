@@ -14,3 +14,6 @@ python -c "import scripts.tools as tools; tools.generate_readme()"
 
 
 python $dirname/setup.py bdist_wheel --dist-dir $dirname/dist
+
+# 删除打包时间文件
+python -c "import scripts.tools as tools; tools.remove_package_time()"

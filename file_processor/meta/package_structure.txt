@@ -9,7 +9,6 @@ file_processor
 │   │   ├── changelog.md
 │   │   ├── example.yml
 │   │   ├── package_structure.txt
-│   │   ├── package_time.txt
 │   │   └── readme.tpl.md
 │   ├── notification
 │   │   ├── __init__.py
@@ -38,4 +37,4 @@ file_processor
 └── tests
     └── test_ftp_match.py
 
-9 directories, 30 files
+9 directories, 29 files
