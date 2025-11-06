@@ -1,11 +1,21 @@
 {
     "terminal.integrated.profiles.linux": {
-        "zsh": {
-            "path": "/bin/zsh",
+        "zsh-custom": {
+            "path": "/usr/bin/zsh", // 指定 Shell 类型（bash/zsh）
             "args": [
-                "-l"
+               "-l",
+                "-c",
+                "cd '${workspaceFolder}' && source scripts/shell_env.init.sh && exec /usr/bin/zsh -i"
             ]
-        }
+        },
+        "bash-custom": {
+            "path": "/usr/bin/bash", // 指定 Shell 类型（bash/zsh）
+            "args": [
+               "--init-file",
+               "${workspaceFolder}/scripts/shell_env.init.sh",
+                "-i",
+            ]
+        },
     },
-    "terminal.integrated.defaultProfile.linux": "zsh",
+    "terminal.integrated.defaultProfile.linux": "zsh-custom", // 设为默认终端
 }
