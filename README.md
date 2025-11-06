@@ -12,6 +12,11 @@
 
 
 ## 版本更新
+## 0.0.3-rc0
+1. 更新 example.yml 配置文件 @emrys.liu
+2. Fix: logic的COA文件中的wafer ID，需要的格式是KPB425_02，不是KPB425#02 @dukang
+3. Fix: logic的APC文件，REPLY_DTTS对应的日期，要和Dram一样，是2025/9/29 03:43:00这种，不要自定义的2025-09-29 03:43:00 @dukang
+
 ## 0.0.3-dev
 1. 支持多个命令: run -- 处理文件；package-info 显示包信息
 2. 处理器 dram.coa 第一列数据用 LOT_ID 替换数据 mother lot 9位
@@ -28,6 +33,7 @@
 ## 项目结构
 ```
 file_processor
+├── LICENSE
 ├── README.md
 ├── file_processor
 │   ├── __init__.py
@@ -61,12 +67,13 @@ file_processor
 ├── scripts
 │   ├── build.sh
 │   ├── proxy.sh
+│   ├── shell_env.init.sh
 │   └── tools.py
 ├── setup.py
 └── tests
     └── test_ftp_match.py
 
-9 directories, 29 files
+9 directories, 31 files
 
 ```
 
@@ -169,10 +176,16 @@ app:
       proc_types: # 处理类型
         - type: t7_code # T7Code文件处理
           filter: 'T7Code*.xlsx' # 匹配T7Code*.xlsx文件
+          dl_path: dram/dl/t7_code # 下载路径, 或被覆盖或者指定
+          ul_path: dram/upload/t7_code
         - type: coa # COA文件处理
-          filter: 'T7Code*.xlsx' # 匹配T7Code*.xlsx文件
+          filter: 'COA*.xlsx' # 匹配COA*.xlsx文件
+          dl_path: dram/dl/coa # 下载路径, 或被覆盖或者指定 
+          ul_path: dram/upload/coa
         - type: apc # APC文件处理
-          filter: 'APC*.xlsx' # 匹配APC*.xlsx文件 -------------------------------- Logic End ----------------------------
+          filter: 'APC*.xlsx' # 匹配APC*.xlsx文件
+          dl_path: dram/dl/apc # 下载路径, 或被覆盖或者指定 
+          ul_path: dram/upload/apc # 上传路径 ，相对于 store.root_path, 会覆盖 url.path -------------------------------- Logic End ----------------------------
   logger:
     log_level: debug
     log_file: data/log/file_processor.log
