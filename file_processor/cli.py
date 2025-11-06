@@ -1,6 +1,7 @@
 import argparse 
 import sys
 from pathlib import Path
+from tkinter import NO
 
 from file_processor.utils.config import load_config
 from file_processor.utils.logger import logger, init_logger
@@ -16,7 +17,7 @@ def path_check(path: str|Path):
     
     return path
 
-def parse_args():
+def parse_args(_call_from: str|None = None):
     if len(sys.argv) >= 2: # 至少有一个参数，第一个参数为命令或选项
         first_args = sys.argv[1]
         if first_args.startswith('-') and first_args not in ['-h', '--help']: # 设置默认命令
@@ -24,7 +25,7 @@ def parse_args():
     if len(sys.argv) == 1: # 没有参数，默认运行run命令
         sys.argv.append('--help')
     
-    parser = argparse.ArgumentParser(prog=sys.argv[0], description="文件处理")
+    parser = argparse.ArgumentParser(prog='python -m file_processor', description="文件处理")
     _subparsers = parser.add_subparsers(dest="command", help="支持如下命令")
     _run_parser = _subparsers.add_parser("run", help="运行文件处理任务")
     _run_parser.add_argument( "-c", "--config", required=True, help="配置文件路径", type=path_check)
@@ -83,8 +84,8 @@ def cmd_package_info(log: bool = False, struct: bool = False):
         print('\n'.join(_package.package_structure()))
 
 
-def cli():
-    args = parse_args()
+def cli(call_from: str|None = None):
+    args = parse_args(call_from)
     kawrgs = vars(args)
     
     cmds_list = {
@@ -97,4 +98,4 @@ def cli():
 
 
 if __name__ == "__main__":
-    cli()
+    cli('cli.py.__main__')

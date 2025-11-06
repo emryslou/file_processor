@@ -9,6 +9,10 @@
 8. 处理器: 支持 逻辑处理器 (logic) 和 内存处理器 (dram)
 
 # 版本更新
+## 0.0.3-dev
+1. 支持多个命令: run -- 处理文件；package-info 显示包信息
+2. 处理器 dram.coa 第一列数据用 LOT_ID 替换数据 mother lot 9位
+
 ## 0.0.2-rc2
 1. 修复 store 资源回收问题
 

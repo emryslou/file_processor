@@ -34,8 +34,9 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "file_processor = file_processor.cli:client",
+            "file_processor = file_processor.cli:cli",
         ],
+    
     },
     classifiers=[
         "Programming Language :: Python :: 3",

@@ -77,7 +77,23 @@ def proc_coa_file(input_file: str|Path, output_dir: str|Path) -> Path:
         new_df = df.copy()
         new_df.iloc[3, :] = ''
         new_df.iloc[2, 1] = lot_id
-
+        
+        """
+        处理第一列数据，处理逻辑如下:
+        1. 从 值为 'Wafer ID'的下一行开始处理，
+        2. 处理方式: 将字符用 '_' 分割，然后第一个替换为 lot_id, 之后用 '_' 连接, 然后替换对应行
+        3. 如果遇到包含空格或者空值的行，则停止处理
+        """
+        # 从 值为 'Wafer ID'的下一行开始处理
+        start_row = df.index[df.iloc[:, 0] == 'Wafer ID'].tolist()[0] + 1
+        for line in new_df.iloc[start_row:, 0]:
+            if line == '' or ' ' in line:
+                break
+            line_parts = line.split('_')
+            line_parts[0] = lot_id
+            new_df.iloc[start_row, 0] = '_'.join(line_parts)
+            start_row += 1
+        
         output_file = Path(output_dir) / f"COA_{lot_id}.csv"
         # 添加header=False，避免输出表头行
         new_df.to_csv(output_file, index=False, header=False)
