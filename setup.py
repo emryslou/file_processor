@@ -23,7 +23,7 @@ setup(
         'file_processor': ['meta/*.md', 'meta/*.txt', 'meta/*.yml'],
     },
     install_requires=[
-        'click == 8.3.0',
+        # 'click == 8.3.0',
         'numpy >= 1.24.0, < 2.0.0',  # 添加numpy依赖并指定版本范围
         'pandas >= 2.1.4, < 3.0.0',  # 更新到与Python 3.11更兼容的pandas版本
         'openpyxl == 3.1.5',
@@ -36,7 +36,6 @@ setup(
         "console_scripts": [
             "file_processor = file_processor.cli:cli",
         ],
-    
     },
     classifiers=[
         "Programming Language :: Python :: 3",
