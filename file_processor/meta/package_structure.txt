@@ -1,4 +1,5 @@
 file_processor
+├── LICENSE
 ├── README.md
 ├── file_processor
 │   ├── __init__.py
@@ -32,9 +33,10 @@ file_processor
 ├── scripts
 │   ├── build.sh
 │   ├── proxy.sh
+│   ├── shell_env.init.sh
 │   └── tools.py
 ├── setup.py
 └── tests
     └── test_ftp_match.py
 
-9 directories, 29 files
+9 directories, 31 files
