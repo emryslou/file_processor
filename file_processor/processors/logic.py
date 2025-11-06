@@ -135,7 +135,7 @@ def proc_coa_file(input_file: str|Path, output_dir: str|Path) -> Path:
         row_number = 5
         for i in range(old_df.shape[0]):
             # # 第5行第1列: 源文件的第3列,
-            new_df.iloc[row_number+i, 0] = str(old_df.iloc[i, 2]).replace(lot_id, '')
+            new_df.iloc[row_number+i, 0] = str(old_df.iloc[i, 2]) # .replace(lot_id, '')
             # # 第5行第2列: 源文件的第2列,
             new_df.iloc[row_number+i, 1] = old_df.iloc[i, 1]
             # # 第5行剩余列：值均为 'Pass'

@@ -12,6 +12,7 @@
 ## 0.0.3-dev
 1. 支持多个命令: run -- 处理文件；package-info 显示包信息
 2. 处理器 dram.coa 第一列数据用 LOT_ID 替换数据 mother lot 9位
+3. 处理器 logic.coa 第一列数据用 增加 Lot ID 前缀
 
 ## 0.0.2-rc2
 1. 修复 store 资源回收问题
