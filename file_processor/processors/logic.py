@@ -216,7 +216,8 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
             
             #  Fix: logic的APC文件，REPLY_DTTS对应的日期，要和Dram一样，是2025/9/29 03:43:00这种，不要自定义的2025-09-29 03:43:00 @dukang
             cell_0 = datetime.strptime(str(new_row.iloc[reply_dtts_idx]).strip(), "%Y-%m-%d %H:%M:%S")
-            new_row.iloc[reply_dtts_idx] = f"{cell_0.year}/{cell_0.month}/{cell_0.day} {cell_0.hour}:{cell_0.minute:02d}:{cell_0.second:02d}"
+            # Issue Fix: apc文件的第一列日期时间格式，要去掉秒， 不管dram还是logic @dukang
+            new_row.iloc[reply_dtts_idx] = f"{cell_0.year}/{cell_0.month}/{cell_0.day} {cell_0.hour}:{cell_0.minute:02d}"
             
             new_row.iloc[substrate_id_idx] = format(subtitle_id_bin, '025b')
             new_row.iloc[machine_type_idx] = 'ASML'

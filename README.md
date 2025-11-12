@@ -12,6 +12,9 @@
 
 
 ## 版本更新
+## 0.0.3-rc1
+1. Issue Fix: apc文件的第一列日期时间格式，要去掉秒， 不管dram还是logic @dukang
+
 ## 0.0.3-rc0
 1. 更新 example.yml 配置文件 @emrys.liu
 2. Fix: logic的COA文件中的wafer ID，需要的格式是KPB425_02，不是KPB425#02 @dukang
