@@ -31,6 +31,8 @@ setup(
         'pyyaml == 6.0.3',
         'paramiko == 4.0.0',
         'xlrd == 2.0.1',
+        'pytest == 8.3.2',
+        'pytest-mock == 3.14.0',
     ],
     entry_points={
         "console_scripts": [
