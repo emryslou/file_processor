@@ -12,6 +12,9 @@
 
 
 ## 版本更新
+## 0.1.0-dev1
+1. 代码优化，提升质量【补充更多测试用例】
+
 ## 0.0.3-rc1
 1. Issue Fix: apc文件的第一列日期时间格式，要去掉秒， 不管dram还是logic @dukang
 
@@ -45,9 +48,12 @@ file_processor
 │   ├── meta
 │   │   ├── __init__,py
 │   │   ├── changelog.md
+│   │   ├── cov-report.md
 │   │   ├── example.yml
 │   │   ├── package_structure.txt
-│   │   └── readme.tpl.md
+│   │   ├── readme.tpl.md
+│   │   ├── test-cov-report.md
+│   │   └── test-report.md
 │   ├── notification
 │   │   ├── __init__.py
 │   │   └── email.py
@@ -67,16 +73,27 @@ file_processor
 │       ├── config.py
 │       ├── logger.py
 │       └── package_info.py
+├── pytest.ini
 ├── scripts
 │   ├── build.sh
 │   ├── proxy.sh
 │   ├── shell_env.init.sh
 │   └── tools.py
 ├── setup.py
+├── test-report.md
 └── tests
-    └── test_ftp_match.py
+    ├── meta
+    │   └── test_meta.py
+    ├── stores
+    │   ├── test_ftp.py
+    │   ├── test_local.py
+    │   └── test_store.py
+    └── utils
+        ├── test_config.py
+        ├── test_logger.py
+        └── test_package_info.py
 
-9 directories, 31 files
+12 directories, 42 files
 
 ```
 
@@ -207,3 +224,26 @@ app:
       smtp_username: "emrys.liu@foxmail.com"  # SMTP用户名
       smtp_password: "password_or_authorization_code"    # SMTP密码或授权码
 ```
+
+## 测试覆盖率报告
+| Name                                         |    Stmts |     Miss |   Cover |
+|--------------------------------------------- | -------: | -------: | ------: |
+| file\_processor/\_\_init\_\_.py              |        3 |        0 |    100% |
+| file\_processor/\_\_main\_\_.py              |        2 |        2 |      0% |
+| file\_processor/cli.py                       |       70 |       70 |      0% |
+| file\_processor/notification/\_\_init\_\_.py |       65 |       65 |      0% |
+| file\_processor/notification/email.py        |       36 |       36 |      0% |
+| file\_processor/processors/\_\_init\_\_.py   |       71 |       71 |      0% |
+| file\_processor/processors/dram.py           |      103 |      103 |      0% |
+| file\_processor/processors/logic.py          |      120 |      120 |      0% |
+| file\_processor/stores/\_\_init\_\_.py       |       31 |        3 |     90% |
+| file\_processor/stores/ftp.py                |       93 |       19 |     80% |
+| file\_processor/stores/ftps.py               |      133 |      113 |     15% |
+| file\_processor/stores/local.py              |       35 |       20 |     43% |
+| file\_processor/stores/sftp.py               |       95 |       76 |     20% |
+| file\_processor/stores/store.py              |       50 |       12 |     76% |
+| file\_processor/utils/\_\_init\_\_.py        |        0 |        0 |    100% |
+| file\_processor/utils/config.py              |       48 |        2 |     96% |
+| file\_processor/utils/logger.py              |        4 |        1 |     75% |
+| file\_processor/utils/package\_info.py       |       42 |       13 |     69% |
+|                                    **TOTAL** | **1001** |  **726** | **27%** |
