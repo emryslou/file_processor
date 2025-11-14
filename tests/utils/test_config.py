@@ -112,3 +112,94 @@ app:
         assert processor_config is not None
         assert processor_config['name'] == 'dram_processor'
         assert processor_config['driver'] == 'dram'
+        assert processor_config['dl_path'] is not None
+        assert processor_config['dl_path']['store'] == 'local/local_store'
+        assert processor_config['dl_path']['path'] == 'dram/dl'
+
+        assert processor_config['bak_path'] is not None
+        assert processor_config['bak_path']['store'] == 'local/local_store'
+        assert processor_config['bak_path']['path'] == 'dram/bak'
+        assert processor_config['ul_path'] is not None
+        assert processor_config['ul_path']['store'] == 'local/local_store'
+        assert processor_config['ul_path']['path'] == 'dram/upload'
+
+        assert processor_config['proc_types'] is not None
+        assert len(processor_config['proc_types']) == 3
+        assert processor_config['proc_types'][0]['type'] == 't7_code'
+        assert processor_config['proc_types'][0]['filter'] == 't7_code*.xlsx'
+        assert processor_config['proc_types'][0]['dl_path'] == 'dram/dl/t7_code'
+        assert processor_config['proc_types'][0]['ul_path'] == 'dram/upload/t7_code'
+
+        assert processor_config['proc_types'][1]['type'] == 'coa'
+        assert processor_config['proc_types'][1]['filter'] == 'COA*.xlsx'
+        assert processor_config['proc_types'][1]['dl_path'] == 'dram/dl/coa'
+        assert processor_config['proc_types'][1]['ul_path'] == 'dram/upload/coa'
+        
+        assert processor_config['proc_types'][2]['type'] == 'apc'
+        assert processor_config['proc_types'][2]['filter'] == '*APC*.xlsx'
+        assert processor_config['proc_types'][2]['dl_path'] == 'dram/dl/apc'
+        assert processor_config['proc_types'][2]['ul_path'] == 'dram/upload/apc'
+
+def test_logger():
+    """
+    测试日志配置
+    """
+    mock_file_name = '/mock/path/proc-config.yml'
+    mock_file_content = """
+version: 1.0.0
+app:
+    stores:
+        - name: local_store
+          type: local
+          path: /mock/path/store1
+    processors:
+        - driver: dram
+          name: dram_processor
+    logger:
+        level: DEBUG
+    notification:
+        - type: email
+          to: 
+            - user1@example.com
+            - user2@example.com
+"""
+    with patch('builtins.open', mock_open(read_data=mock_file_content)) as mock_file:
+        util_config.load_config(mock_file_name)
+        logger_config = util_config.logger()
+        assert logger_config is not None
+        assert logger_config['level'] == 'DEBUG'
+
+def test_notification():
+    """
+    测试通知配置
+    """
+    mock_file_name = '/mock/path/proc-config.yml'
+    mock_file_content = """
+version: 1.0.0
+app:
+    stores:
+        - name: local_store
+          type: local
+          path: /mock/path/store1
+    processors:
+        - driver: dram
+          name: dram_processor
+    logger:
+        level: DEBUG
+    notification:
+        - type: email      
+          subject: "文件处理报告"     # 邮件主题
+          sender: "emrys.liu@foxmail.com"  # 发送者邮箱
+          recipients:                       # 接收者邮箱列表
+            - "emrys.liu@foxmail.com"
+            # - "recipient2@example.com"
+          smtp_server: "smtp.qq.com"   # SMTP服务器地址
+          smtp_port: 465                    # SMTP服务器端口
+          smtp_username: "emrys.liu@foxmail.com"  # SMTP用户名
+          smtp_password: "xxxxxx"    # SMTP密码或授权码
+"""
+    with patch('builtins.open', mock_open(read_data=mock_file_content)) as mock_file:
+        util_config.load_config(mock_file_name)
+        notification_config = util_config.notify('email')
+        assert notification_config is not None
+        assert notification_config['type'] == 'email'

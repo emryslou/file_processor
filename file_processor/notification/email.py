@@ -63,5 +63,5 @@ class EmailNotification:
                 raise
         except Exception as e:
             # 处理其他所有异常
-            logger.error(f"发送邮件失败: {e}")
+            logger.exception(f"发送邮件失败: {e}")
             raise

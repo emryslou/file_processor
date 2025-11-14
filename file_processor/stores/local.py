@@ -119,3 +119,9 @@ class LocalStore(Store):
         """
         import shutil
         shutil.move(src_path, dst_path)
+
+    def close(self):
+        """
+        关闭与远程存储的连接
+        """
+        pass

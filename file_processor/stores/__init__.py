@@ -9,12 +9,26 @@ from file_processor.utils.logger import logger
 
 
 def create_store(store: str) -> Store:
+    """
+    创建存储实例
+
+    Args:
+        store (str): 存储名称，格式为 type/name
+    Returns:
+        Store: 存储实例
+    """
     _type, _name = store.split('/')
     if _name in Store.__instances__:
         return Store.__instances__[_name]
+        
     for plugin in Store.plugins():
         if plugin.__type__ == _type:
             _config = store_config(_type, _name)
+            
+            assert 'root_path' in _config, f"存储 {_type}/{_name} 配置中缺少 root_path"
+            assert 'name' in _config, f"存储 {_type}/{_name} 配置中缺少 name"
+            assert 'type' in _config, f"存储 {_type}/{_name} 配置中缺少 type"
+            
             root_path = _config['root_path']
             del _config['root_path'], _config['name'], _config['type']
             _instance = plugin(_name, root_path, **_config)
