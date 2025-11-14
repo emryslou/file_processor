@@ -83,7 +83,7 @@ def test_ftp_upload(ftp_store_fixture):
         assert store.list(str(root_path), 'file1.txt') == [root_path / 'file1.txt']
     finally:
         local_path.unlink(missing_ok=True)
-        store.delete(root_path / 'file1.txt')
+        store.rm(root_path / 'file1.txt')
 
 def test_ftp_exists(ftp_store_fixture):
     """
@@ -98,7 +98,7 @@ def test_ftp_exists(ftp_store_fixture):
     try:
         store.upload(local_file, root_path)
         assert store.exists(str(root_path / local_file.name)) == True
-        store.delete(root_path / local_file.name)
+        store.rm(root_path / local_file.name)
         assert store.exists(str(root_path / local_file.name)) == False
     finally:
         local_file.unlink(missing_ok=True)
@@ -126,7 +126,7 @@ def test_ftp_download(ftp_store_fixture):
     finally:
         local_file.unlink(missing_ok=True)
         download_file.unlink(missing_ok=True)
-        store.delete(root_path / local_file.name)
+        store.rm(root_path / local_file.name)
 
 
 def test_ftp_mk_rm_dir(ftp_store_fixture):

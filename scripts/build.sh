@@ -1,6 +1,10 @@
 dirname=$(dirname $(dirname $(readlink -f $0)))
 project_name=$(basename $dirname)
 
+# 生成测试覆盖率报告
+pytest --md=file_processor/meta/test-report.md --cov=file_processor --cov-report=markdown:file_processor/meta/cov-report.md
+cp file_processor/meta/test-report.md $dirname/test-report.md
+
 # 生成项目结构文件
 tree $dirname -I dist -I __pycache__ -I dist -I build -I *.egg-info -I config -I data -I *.log > $dirname/$project_name/meta/package_structure.txt
 sed -i "s#$dirname#$project_name#g" $dirname/$project_name/meta/package_structure.txt > $dirname/$project_name/meta/$project_name.txt

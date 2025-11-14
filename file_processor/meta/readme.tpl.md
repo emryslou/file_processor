@@ -37,3 +37,10 @@ Options:
 ```yml
 {{meta/example.yml}}
 ```
+
+# 测试报告
+## 测试用例执行结果
+{{meta/test-report.md}}
+
+## 测试用例覆盖率
+{{meta/cov-report.md}}

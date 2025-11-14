@@ -74,6 +74,12 @@ def read_package_structure():
     with open(os.path.join(META_PATH, 'package_structure.txt'), 'r', encoding='utf-8') as f:
         return f.read()
 
+def read_test_cov_report():
+    """读取test-cov-report.md文件内容
+    """
+    with open(os.path.join(META_PATH, 'test-cov-report.md'), 'r', encoding='utf-8') as f:
+        return f.read()
+
 def generate_readme():
     """生成README.md文件
     """
@@ -88,6 +94,8 @@ def generate_readme():
     content = content.replace('{{meta/example.yml}}', read_example_cfg())
     # 项目结构
     content = content.replace('{{meta/package_structure}}', read_package_structure())
+    # 测试覆盖率报告
+    content = content.replace('{{meta/cov-report.md}}', read_test_cov_report())
 
     # 写回文件
     with open(os.path.join(ROOT_PATH, 'README.md'), 'w', encoding='utf-8') as f:

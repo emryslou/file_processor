@@ -8,9 +8,11 @@ file_processor
 │   ├── meta
 │   │   ├── __init__,py
 │   │   ├── changelog.md
+│   │   ├── cov-report.md
 │   │   ├── example.yml
 │   │   ├── package_structure.txt
-│   │   └── readme.tpl.md
+│   │   ├── readme.tpl.md
+│   │   └── test-report.md
 │   ├── notification
 │   │   ├── __init__.py
 │   │   └── email.py
@@ -30,13 +32,24 @@ file_processor
 │       ├── config.py
 │       ├── logger.py
 │       └── package_info.py
+├── pytest.ini
 ├── scripts
 │   ├── build.sh
 │   ├── proxy.sh
 │   ├── shell_env.init.sh
 │   └── tools.py
 ├── setup.py
+├── test-report.md
 └── tests
-    └── test_ftp_match.py
+    ├── meta
+    │   └── test_meta.py
+    ├── stores
+    │   ├── test_ftp.py
+    │   ├── test_local.py
+    │   └── test_store.py
+    └── utils
+        ├── test_config.py
+        ├── test_logger.py
+        └── test_package_info.py
 
-9 directories, 31 files
+12 directories, 41 files

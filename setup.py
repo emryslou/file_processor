@@ -24,16 +24,32 @@ setup(
     },
     install_requires=[
         # 'click == 8.3.0',
+        'pyyaml == 6.0.3',
+        'loguru == 0.7.3',
+
         'numpy >= 1.24.0, < 2.0.0',  # 添加numpy依赖并指定版本范围
         'pandas >= 2.1.4, < 3.0.0',  # 更新到与Python 3.11更兼容的pandas版本
+        
         'openpyxl == 3.1.5',
-        'loguru == 0.7.3',
-        'pyyaml == 6.0.3',
-        'paramiko == 4.0.0',
-        'xlrd == 2.0.1',
-        'pytest == 8.3.2',
-        'pytest-mock == 3.14.0',
+        'xlrd == 2.0.1', # for xlsx
     ],
+    extras_require={
+        'dev': [
+            'pytest == 8.3.2',  # 仅开发环境安装
+            'pytest-mock == 3.14.0',  # 仅开发环境安装
+            'pytest-cov == 4.1.0',  # 仅开发环境安装
+            'pytest-xdist == 3.6.1',  # 仅开发环境安装
+            'pytest-md == 0.2.0',  # 仅开发环境安装
+        ],
+        'test': [
+            'pytest == 8.3.2',
+            'pytest-mock == 3.14.0',
+            'pytest-xdist == 3.6.1',
+        ],
+        'sftp': [ # 仅测试环境安装
+            'paramiko == 4.0.0',
+        ],
+    },
     entry_points={
         "console_scripts": [
             "file_processor = file_processor.cli:cli",
