@@ -31,6 +31,7 @@ setup(
         'pyyaml == 6.0.3',
         'paramiko == 4.0.0',
         'xlrd == 2.0.1',
+        'xlwt == 1.3.0',  # 添加xlwt依赖以支持旧版xls格式
     ],
     entry_points={
         "console_scripts": [

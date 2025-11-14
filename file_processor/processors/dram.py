@@ -49,11 +49,34 @@ def proc_t7_code_file(input_file: str|Path, output_dir: str|Path) -> Path:
 
         output_file = Path(output_dir) / f"T7Code_{lot_id}.xls"
         # 添加header=False，避免输出表头行
-        new_df.to_excel(output_file, index=False)
+        # Issue Fix: 添加engine='xlwt'，指定使用xlwt引擎写入xls文件
+        try:
+            import xlwt
+            
+            # 创建一个 xlwt.Workbook 对象
+            wb = xlwt.Workbook()
+            ws = wb.add_sheet('Sheet1')
+            
+            # 写入列名
+            for col_idx, col_name in enumerate(new_df.columns):
+                ws.write(0, col_idx, col_name)
+            
+            # 写入数据
+            for row_idx, row in new_df.iterrows():
+                for col_idx, value in enumerate(row):
+                    ws.write(row_idx + 1, col_idx, value)
+            
+            # 保存为真正的 xls 文件
+            wb.save(output_file)
+            logger.info(f"成功使用 xlwt 直接保存为旧版 xls 格式文件: {output_file}")
+        except Exception as e:
+            logger.warning(f"无法使用 xlwt 直接保存，使用 pandas 默认方式: {e}")
+            # 降级到 pandas 默认方式
+            new_df.to_excel(output_file, index=False)
         logger.info(f"Dram T7Code 文件转换完成, 源文件: {input_file}, 处理后的文件: {output_file}")
         return output_file
     except Exception as e:
-        logger.error(f"Dram T7Code 文件转换失败：{e}")
+        logger.exception(f"Dram T7Code 文件转换失败：{e}")
         raise e
 
 def proc_coa_file(input_file: str|Path, output_dir: str|Path) -> Path:

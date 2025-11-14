@@ -28,14 +28,38 @@ def proc_t7_code_file(input_file: str|Path, output_dir: str|Path) -> Path:
         # 重命名列
         df.rename(columns={'LOT NAME': 'LOT ID'}, inplace=True)
         
-        # 保存为 xls 文件
+        # 保存为真正的旧版 xls 文件
+        # 由于 pandas 2.x 不再直接支持 xlwt 引擎，我们手动使用 xlwt 库
         output_file = Path(output_dir) / f"T7Code_{lot_id}.xls"
-        df.to_excel(output_file, index=False)
+        try:
+            import xlwt
+            
+            # 创建一个 xlwt.Workbook 对象
+            wb = xlwt.Workbook()
+            ws = wb.add_sheet('Sheet1')
+            
+            # 写入列名
+            for col_idx, col_name in enumerate(df.columns):
+                ws.write(0, col_idx, col_name)
+            
+            # 写入数据
+            for row_idx, row in df.iterrows():
+                for col_idx, value in enumerate(row):
+                    ws.write(row_idx + 1, col_idx, value)
+            
+            # 保存为真正的 xls 文件
+            wb.save(output_file)
+            logger.info(f"成功使用 xlwt 直接保存为旧版 xls 格式文件: {output_file}")
+        except Exception as e:
+            logger.warning(f"无法使用 xlwt 直接保存，使用 pandas 默认方式: {e}")
+            # 降级到 pandas 默认方式
+            df.to_excel(output_file, index=False)
         
         logger.info(f"T7Code 文件转换完成, 源文件: {input_file}, 处理后的文件: {output_file}")
         return output_file
     except Exception as e:
-        logger.error(f"T7Code 文件转换失败：{e}")
+        logger.exception(f"T7Code 文件转换失败：{e}")
+        raise e
 
 def proc_coa_file(input_file: str|Path, output_dir: str|Path) -> Path:
     """ 处理 Logic COA 文件转换"""
@@ -227,7 +251,7 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
             new_df.loc[len(new_df)] = new_row
 
         out_file = Path(output_dir) / f"APC_{lot_id}.xlsx"
-        new_df.to_excel(out_file, index=False)
+        new_df.to_excel(out_file, index=False,)
 
         logger.info(f"Logic APC 文件转换完成, 源文件: {input_file}, 处理后的文件: {out_file}")
         return out_file
