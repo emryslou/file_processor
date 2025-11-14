@@ -62,16 +62,6 @@ class Store(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def delete(self, remote_path: str|Path):
-        """
-        删除远程存储中的文件
-
-        Args:
-            remote_path (str|Path): 远程存储路径
-        """
-        raise NotImplementedError
-    
-    @abstractmethod
     def list(self, remote_path: str|Path) -> list:
         """
         列出远程存储中的文件

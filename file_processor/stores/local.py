@@ -48,15 +48,6 @@ class LocalStore(Store):
         shutil.copy(remote_path, _local_path)
         return Path(_local_path)
     
-    def delete(self, remote_path: str|Path):
-        """
-        删除远程存储中的文件
-
-        Args:
-            remote_path (str|Path): 远程存储路径
-        """
-        pass
-    
     def list(self, remote_path: str|Path, pattern: str) -> list:
         """
         列出远程存储中的文件
@@ -98,7 +89,7 @@ class LocalStore(Store):
         Args:
             remote_path (str|Path): 远程存储路径
         """
-        pass
+        (self.root_path / remote_path).mkdir(parents=True, exist_ok=True)
 
     def rm(self, remote_path: str|Path):
         """
@@ -107,7 +98,7 @@ class LocalStore(Store):
         Args:
             remote_path (str|Path): 远程存储路径
         """
-        pass
+        (self.root_path / remote_path).unlink(missing_ok=True)
 
     def mv(self, src_path: str|Path, dst_path: str|Path):
         """

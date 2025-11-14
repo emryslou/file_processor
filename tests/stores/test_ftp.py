@@ -2,11 +2,14 @@ from logging import root
 import pytest
 from unittest.mock import patch
 from pathlib import Path
+import sys
+
+from file_processor.stores.ftp import FTPStore
 
 
 @pytest.fixture(scope="function")
 def ftp_store_fixture():
-    from file_processor.stores.ftp import FTPStore
+    
     store = FTPStore('test_ftp', '/应用文件-xunlei/data/data', host="192.168.1.27", port=2121, user="admin", password="Abcd1234")
     yield store
     store.close()
@@ -64,3 +67,117 @@ def test_ftp_list(ftp_store_fixture):
         match_files_contain_xls = store.list(str(root_path), '*xls*')
         assert len(match_files_contain_xls) == 4
         assert match_files_contain_xls == [root_path / Path(item) for item in mock_root_path_files if 'xls' in item]
+
+def test_ftp_upload(ftp_store_fixture):
+    """
+    测试FTPStore上传文件
+    """
+    store: FTPStore = ftp_store_fixture
+    root_path = store.root_path
+    local_path = Path('/tmp/file1.txt')
+    local_path.write_text('test content')
+    assert local_path.exists(), "本地文件不存在"
+    try:
+        store.upload(local_path, root_path)
+        # mock_ftp.storbinary.assert_called_once_with(f'STOR {root_path}', open(local_path, 'rb'))
+        assert store.list(str(root_path), 'file1.txt') == [root_path / 'file1.txt']
+    finally:
+        local_path.unlink(missing_ok=True)
+        store.delete(root_path / 'file1.txt')
+
+def test_ftp_exists(ftp_store_fixture):
+    """
+    测试FTPStore检查文件是否存在
+    """
+    store = ftp_store_fixture
+    root_path = store.root_path
+    import random
+    local_file = Path('/tmp') / f'tmp_file_{random.randint(0, 1000000)}.txt'
+    local_file.write_text(f'test content {local_file.name}')
+    
+    try:
+        store.upload(local_file, root_path)
+        assert store.exists(str(root_path / local_file.name)) == True
+        store.delete(root_path / local_file.name)
+        assert store.exists(str(root_path / local_file.name)) == False
+    finally:
+        local_file.unlink(missing_ok=True)
+
+def test_ftp_download(ftp_store_fixture):
+    """
+    测试FTPStore下载文件
+    """
+    store = ftp_store_fixture
+    root_path = store.root_path
+    """
+    测试FTPStore下载文件
+    对应方法是: FTPStore.download(remote_path: str|Path, local_path: str|Path)
+    """
+    import random
+    local_file = Path('/tmp') / f'tmp_file_{random.randint(0, 1000000)}.txt'
+    local_file.write_text(f'test content {local_file.name}')
+    assert local_file.exists(), "本地文件不存在"
+    download_file = Path('/tmp') / f'tmp_download_file_{random.randint(0, 1000000)}.txt'
+    try:
+        store.upload(local_file, root_path)
+        store.download(root_path / local_file.name, download_file)
+        assert download_file.exists(), "下载的文件不存在"
+        assert download_file.read_text() == f'test content {local_file.name}', "下载的文件内容与上传的不一致"
+    finally:
+        local_file.unlink(missing_ok=True)
+        download_file.unlink(missing_ok=True)
+        store.delete(root_path / local_file.name)
+
+
+def test_ftp_mk_rm_dir(ftp_store_fixture):
+    """
+    测试FTPStore创建目录
+    """
+    store = ftp_store_fixture
+    root_path = store.root_path
+    import random
+    dir_name = f'tmp_dir_{random.randint(0, 1000000)}'
+    
+    store.mkdir(root_path / dir_name)
+    assert store.exists(str(root_path / dir_name)), "创建目录失败"
+    store.rmdir(root_path / dir_name)
+    assert not store.exists(str(root_path / dir_name)), "删除目录失败"
+
+@pytest.mark.skipif(not sys.platform.startswith('win'), reason="仅在Windows平台运行")
+def test_ftp_mk_rm_dir_win(ftp_store_fixture):
+    """
+    测试FTPStore创建目录
+    """
+    store = ftp_store_fixture
+    root_path = store.root_path
+    import random
+    dir_name = f'tmp_dir_{random.randint(0, 1000000)}'
+    
+    store.mkdir(root_path / dir_name)
+    assert store.exists(str(root_path / dir_name)), "创建目录失败"
+    store.rmdir(root_path / dir_name)
+    assert not store.exists(str(root_path / dir_name)), "删除目录失败"
+
+def test_ftp_mv_file(ftp_store_fixture):
+    """
+    测试FTPStore移动文件
+    """
+    store: FTPStore = ftp_store_fixture
+    root_path = store.root_path
+    import random
+    local_file = Path('/tmp') / f'tmp_file_{random.randint(0, 1000000)}.txt'
+    local_file.write_text(f'test content {local_file.name}')
+    assert local_file.exists(), "本地文件不存在"
+    try:
+        if not store.exists(root_path / 'dir1'):
+            store.mkdir(root_path / 'dir1')
+
+        store.upload(local_file, root_path)
+        assert store.exists(str(root_path / local_file.name)), "上传文件失败"
+        store.mv(root_path / local_file.name, root_path / 'dir1' / local_file.name)
+        assert store.exists(str(root_path / 'dir1' / local_file.name)), "新位置文件不存在, 移动失败"
+        assert not store.exists(str(root_path / local_file.name)), "旧位置文件存在, 移动失败"
+    finally:
+        local_file.unlink(missing_ok=True)
+        store.rm(root_path / 'dir1' / local_file.name)
+        store.rmdir(root_path / 'dir1')

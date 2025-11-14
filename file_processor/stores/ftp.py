@@ -65,20 +65,6 @@ class FTPStore(Store):
             logger.exception(f"下载文件 {remote_path} 到 {local_path} 失败: {e}")
             raise Exception(f"下载文件 {remote_path} 到 {local_path} 失败: {e}")
     
-    def delete(self, remote_path: str|Path):
-        """
-        删除远程存储中的文件
-
-        Args:
-            remote_path (str|Path): 远程存储路径
-        """
-        try:
-            if self.is_win:
-                remote_path = Path(remote_path).as_posix()
-            self.ftp.delete(remote_path)
-        except Exception as e:
-            logger.exception(f"删除文件 {remote_path} 失败: {e}")
-            raise Exception(f"删除文件 {remote_path} 失败: {e}")    
     
     def list(self, remote_path: str|Path, pattern: str = '*') -> list:
         """
@@ -112,13 +98,23 @@ class FTPStore(Store):
         Returns:
             bool: 文件是否存在
         """
+        if self.is_win:
+            remote_path = Path(remote_path).as_posix()
         try:
-            if self.is_win:
-                remote_path = Path(remote_path).as_posix()
-            self.ftp.size(remote_path)
+            self.ftp.size(str(remote_path))
             return True
-        except:
-            return False
+        except Exception as e:
+            if '550' in str(e) and 'No such file or directory' in str(e):
+                return False
+            
+            try:
+                cur_dir_bak = self.ftp.pwd()
+                self.ftp.cwd(str(remote_path))
+                self.ftp.cwd(cur_dir_bak)
+                return True
+            except Exception as e:
+                logger.exception(f"检查目录 {remote_path} 是否存在失败: {e}")
+                return False
 
     def mkdir(self, remote_path: str|Path):
         """
@@ -129,7 +125,7 @@ class FTPStore(Store):
         """
         if self.is_win:
             remote_path = Path(remote_path).as_posix()    
-        self.ftp.mkd(remote_path)
+        self.ftp.mkd(str(remote_path))
 
     def rmdir(self, remote_path: str|Path):
         """
@@ -140,7 +136,7 @@ class FTPStore(Store):
         """
         if self.is_win:
             remote_path = Path(remote_path).as_posix()    
-        self.ftp.rmd(remote_path)
+        self.ftp.rmd(str(remote_path))
 
     def rm(self, remote_path: str|Path):
         """
@@ -151,7 +147,7 @@ class FTPStore(Store):
         """
         if self.is_win:
             remote_path = Path(remote_path).as_posix()    
-        self.ftp.delete(remote_path)
+        self.ftp.delete(str(remote_path))
 
     def mv(self, src_path: str|Path, dst_path: str|Path):
         """
@@ -164,7 +160,7 @@ class FTPStore(Store):
         if self.is_win:
             src_path = Path(src_path).as_posix()
             dst_path = Path(dst_path).as_posix()
-        self.ftp.rename(src_path, dst_path)
+        self.ftp.rename(str(src_path), str(dst_path))
     
     def close(self):
         if self.ftp:
