@@ -94,6 +94,7 @@ class FTPSStore(Store):
             remote_path (str|Path): 远程存储路径
         """
         try:
+            local_path = Path(local_path)
             with open(local_path, 'rb') as f:
                 remote_path = Path(remote_path) / local_path.name
                 if self.is_win:
@@ -169,13 +170,22 @@ class FTPSStore(Store):
         Returns:
             bool: 文件是否存在
         """
+        if self.is_win:
+            remote_path = Path(remote_path).as_posix()
         try:
-            if self.is_win:
-                remote_path = Path(remote_path).as_posix()
-            self.ftp.size(remote_path)
+            self.ftp.size(str(remote_path))
             return True
-        except:
-            return False
+        except Exception as e:
+            if '550' in str(e) and 'No such file or directory' in str(e):
+                return False
+            try:
+                cur_dir_bak = self.ftp.pwd()
+                self.ftp.cwd(str(remote_path))
+                self.ftp.cwd(cur_dir_bak)
+                return True
+            except Exception as e:
+                logger.exception(f"检查目录 {remote_path} 是否存在失败: {e}")
+                return False
 
     def mkdir(self, remote_path: str|Path):
         """

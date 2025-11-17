@@ -35,6 +35,7 @@ class SFTPStore(Store):
             remote_path (str|Path): 远程存储路径
         """
         try:
+            local_path = Path(local_path)
             with open(local_path, 'rb') as f:
                 remote_path = Path(remote_path) / local_path.name
                 if self.is_win:
@@ -104,20 +105,74 @@ class SFTPStore(Store):
 
     def exists(self, remote_path: str|Path) -> bool:
         """
-        检查远程存储中的文件是否存在
+        检查远程存储中的文件或目录是否存在
 
         Args:
             remote_path (str|Path): 远程存储路径
 
         Returns:
-            bool: 文件是否存在
+            bool: 文件或目录是否存在
         """
         try:
             if self.is_win:
                 remote_path = Path(remote_path).as_posix()
-            self.sftp.stat(remote_path)
+            
+            # 使用stat方法检查路径是否存在，这是最可靠和高效的方式
+            # 只需要一次网络请求，且能正确处理空目录的情况
+            self.sftp.stat(str(remote_path))
+            logger.debug(f"路径 {remote_path} 存在")
             return True
-        except:
+        except FileNotFoundError:
+            # 明确捕获文件不存在的异常
+            logger.info(f"路径 {remote_path} 不存在")
+            return False
+        except PermissionError:
+            # 捕获权限错误，这通常意味着路径存在但无法访问
+            logger.info(f"路径 {remote_path} 存在但无法访问")
+            return True
+        except Exception as e:
+            # 记录其他异常
+            logger.info(f"检查路径 {remote_path} 时发生错误: {e}")
+            return False
+            
+    def is_directory(self, remote_path: str|Path) -> bool:
+        """
+        专门检测是否为存在的目录
+
+        Args:
+            remote_path (str|Path): 远程存储路径
+
+        Returns:
+            bool: 是否是存在的目录
+        """
+        try:
+            if self.is_win:
+                remote_path = Path(remote_path).as_posix()
+                
+            # 使用stat获取文件属性并检查是否为目录
+            mode = self.sftp.stat(str(remote_path)).st_mode
+            return paramiko.SFTPAttributes.is_directory(mode)
+        except Exception:
+            return False
+            
+    def is_file(self, remote_path: str|Path) -> bool:
+        """
+        专门检测是否为存在的文件
+
+        Args:
+            remote_path (str|Path): 远程存储路径
+
+        Returns:
+            bool: 是否是存在的文件
+        """
+        try:
+            if self.is_win:
+                remote_path = Path(remote_path).as_posix()
+                
+            # 使用stat获取文件属性并检查是否为文件
+            mode = self.sftp.stat(str(remote_path)).st_mode
+            return not paramiko.SFTPAttributes.is_directory(mode)
+        except Exception:
             return False
 
     def mkdir(self, remote_path: str|Path):
@@ -129,7 +184,7 @@ class SFTPStore(Store):
         """
         if self.is_win:
             remote_path = Path(remote_path).as_posix()
-        self.sftp.mkdir(remote_path)
+        self.sftp.mkdir(str(remote_path))
 
     def rmdir(self, remote_path: str|Path):
         """
