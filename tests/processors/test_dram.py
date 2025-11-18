@@ -48,7 +48,14 @@ def test_dram_t7_code(fixture_dram_t7_code):
         assert "Sheet1" in workbook.sheet_names(), "输出文件应该包含'Sheet1'工作表"
         sheet = workbook.sheet_by_name("Sheet1")
         assert sheet.nrows > 0, "输出文件的'Sheet1'工作表应该有数据行"
-        assert sheet.ncols > 0, "输出文件的'Sheet1'工作表应该有数据列"
+        assert sheet.ncols == 3, "输出文件的'Sheet1'工作表应该有3个数据列"
+        columns = sheet.row_values(0)
+        assert columns == ["LOT ID", "T7CODE", "WAFERID"], "输出文件的'Sheet1'工作表第一行应该是 ['LOT ID', 'T7CODE', 'WAFERID']"
+        # 检查数据行是否符合预期
+        for row_index in range(1, sheet.nrows):
+            row_values = sheet.row_values(row_index)
+            assert len(row_values) == 3, f"输出文件的'Sheet1'工作表第{row_index+1}行应该有3个数据列"
+
 
 
 def test_dram_coa():
