@@ -50,9 +50,27 @@ def proc_t7_code_file(input_file: str|Path, output_dir: str|Path) -> Path:
         output_file = Path(output_dir) / f"T7Code_{lot_id}.xls"
         match output_file.suffix:
             case ".xls":
+                logger.warning(f"旧版的 Excel 格式不支持写入大文件, 尝试用 xlwt 库写入")
                 # 写入 xls 文件，旧版本的 Excel 格式
-                pass
+                import xlwt
+            
+                # 创建一个 xlwt.Workbook 对象
+                wb = xlwt.Workbook()
+                ws = wb.add_sheet('Sheet1')
+                
+                # 写入列名
+                for col_idx, col_name in enumerate(new_df.columns):
+                    ws.write(0, col_idx, col_name)
+                
+                # 写入数据
+                for row_idx, row in new_df.iterrows():
+                    for col_idx, value in enumerate(row):
+                        ws.write(row_idx + 1, col_idx, value)
+                
+                # 保存为真正的 xls 文件
+                wb.save(output_file)
             case _:
+                logger.warning(f"其他格式用 pandas 库写入, 尝试用 pandas 库写入 {output_file.suffix}")
                 new_df.to_excel(output_file, index=False)
 
         # 添加header=False，避免输出表头行

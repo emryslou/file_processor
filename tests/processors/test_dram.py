@@ -46,6 +46,9 @@ def test_dram_t7_code(fixture_dram_t7_code):
     import xlrd
     with xlrd.open_workbook(output_file) as workbook:
         assert "Sheet1" in workbook.sheet_names(), "输出文件应该包含'Sheet1'工作表"
+        sheet = workbook.sheet_by_name("Sheet1")
+        assert sheet.nrows > 0, "输出文件的'Sheet1'工作表应该有数据行"
+        assert sheet.ncols > 0, "输出文件的'Sheet1'工作表应该有数据列"
 
 
 def test_dram_coa():
