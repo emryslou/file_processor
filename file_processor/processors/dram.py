@@ -48,8 +48,14 @@ def proc_t7_code_file(input_file: str|Path, output_dir: str|Path) -> Path:
         
 
         output_file = Path(output_dir) / f"T7Code_{lot_id}.xls"
+        match output_file.suffix:
+            case ".xls":
+                # 写入 xls 文件，旧版本的 Excel 格式
+                pass
+            case _:
+                new_df.to_excel(output_file, index=False)
+
         # 添加header=False，避免输出表头行
-        new_df.to_excel(output_file, index=False)
         logger.info(f"Dram T7Code 文件转换完成, 源文件: {input_file}, 处理后的文件: {output_file}")
         return output_file
     except Exception as e:
