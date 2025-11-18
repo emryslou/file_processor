@@ -1,5 +1,4 @@
 from file_processor.utils.logger import logger
-import json
 from .email import EmailNotification
 
 def send_notification(notify_type: str, body: str):

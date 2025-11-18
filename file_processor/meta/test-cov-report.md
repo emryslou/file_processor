@@ -3,7 +3,7 @@
 | file\_processor/\_\_init\_\_.py              |        3 |        0 |    100% |
 | file\_processor/\_\_main\_\_.py              |        2 |        2 |      0% |
 | file\_processor/cli.py                       |       70 |       70 |      0% |
-| file\_processor/notification/\_\_init\_\_.py |       65 |       65 |      0% |
+| file\_processor/notification/\_\_init\_\_.py |       64 |       64 |      0% |
 | file\_processor/notification/email.py        |       36 |       36 |      0% |
 | file\_processor/processors/\_\_init\_\_.py   |       71 |       71 |      0% |
 | file\_processor/processors/dram.py           |      103 |      103 |      0% |
@@ -18,4 +18,4 @@
 | file\_processor/utils/config.py              |       48 |        2 |     96% |
 | file\_processor/utils/logger.py              |        4 |        1 |     75% |
 | file\_processor/utils/package\_info.py       |       42 |       13 |     69% |
-|                                    **TOTAL** | **1036** |  **638** | **38%** |
+|                                    **TOTAL** | **1035** |  **637** | **38%** |
