@@ -104,8 +104,11 @@ def test_dram_apc(fixture_dram):
     # 检查输出文件的内容是否符合预期
     output_df = pd.read_excel(output_file)
     assert output_df.columns.tolist() == [
-        'REPLY_DTTS','交货批次号','PRODUCT_ID','LAYER_ID','MACHINE_TYPE','EQUIPMENT_ID',
+        'REPLY_DTTS','LOT_ID','PRODUCT_ID','LAYER_ID','MACHINE_TYPE','EQUIPMENT_ID',
         'RETICLE','SUBSTRATE_ID','TRANS_X(nm)','TRANS_Y(nm)','EXP_X(ppm)','EXP_Y(ppm)',
         'NON_ORTHO(urad)','ROTATION(urad)','SHOT_ROT(urad)','SHOT_MAG(ppm)',
         'ASYM_ROT(urad)','ASYM_MAG(ppm)','CPE_ID',
-    ], "输出文件的列名应该是 'REPLY_DTTS	交货批次号	PRODUCT_ID	LAYER_ID	MACHINE_TYPE	EQUIPMENT_ID	RETICLE	SUBSTRATE_ID	TRANS_X(nm)	TRANS_Y(nm)	EXP_X(ppm)	EXP_Y(ppm)	NON_ORTHO(urad)	ROTATION(urad)	SHOT_ROT(urad)	SHOT_MAG(ppm)	ASYM_ROT(urad)	ASYM_MAG(ppm)	CPE_ID', 实际: " + str(output_df.columns.tolist())
+    ], "输出文件的列名应该是 'REPLY_DTTS	LOT_ID	PRODUCT_ID	LAYER_ID	MACHINE_TYPE	EQUIPMENT_ID	RETICLE	SUBSTRATE_ID	TRANS_X(nm)	TRANS_Y(nm)	EXP_X(ppm)	EXP_Y(ppm)	NON_ORTHO(urad)	ROTATION(urad)	SHOT_ROT(urad)	SHOT_MAG(ppm)	ASYM_ROT(urad)	ASYM_MAG(ppm)	CPE_ID', 实际: " + str(output_df.columns.tolist())
+
+    assert output_df.iloc[:,0].unique().size == 1, "输出文件的第一列应该有1个唯一值"
+    assert output_df.iloc[:,3].unique().size == 2, "输出文件的第四列应该有2个唯一值"
