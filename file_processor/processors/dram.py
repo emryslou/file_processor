@@ -144,7 +144,7 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
     try:
         logger.info(f"Dram APC 文件开始转换, 源文件: {input_file}")
         
-        df = pd.read_excel(input_file)
+        df = pd.read_excel(input_file)        
         lot_id = df.iloc[0, 1]
 
         new_colums = [
@@ -216,5 +216,5 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
         return output_file
     
     except Exception as e:
-        logger.error(f"Dram APC 文件转换失败：{e}")
+        logger.exception(f"Dram APC 文件转换失败：{e}")
         raise e

@@ -6,7 +6,7 @@
 | file\_processor/notification/\_\_init\_\_.py |       64 |       64 |      0% |
 | file\_processor/notification/email.py        |       36 |       36 |      0% |
 | file\_processor/processors/\_\_init\_\_.py   |       72 |       61 |     15% |
-| file\_processor/processors/dram.py           |      117 |       71 |     39% |
+| file\_processor/processors/dram.py           |      117 |       64 |     45% |
 | file\_processor/processors/logic.py          |      120 |      112 |      7% |
 | file\_processor/stores/\_\_init\_\_.py       |       31 |       21 |     32% |
 | file\_processor/stores/ftp.py                |       93 |       75 |     19% |
@@ -19,4 +19,4 @@
 | file\_processor/utils/errors.py              |        1 |        1 |      0% |
 | file\_processor/utils/logger.py              |        4 |        1 |     75% |
 | file\_processor/utils/package\_info.py       |       42 |       36 |     14% |
-|                                    **TOTAL** | **1051** |  **841** | **20%** |
+|                                    **TOTAL** | **1051** |  **834** | **21%** |
