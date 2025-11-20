@@ -30,7 +30,30 @@ def proc_t7_code_file(input_file: str|Path, output_dir: str|Path) -> Path:
         
         # 保存为 xls 文件
         output_file = Path(output_dir) / f"T7Code_{lot_id}.xls"
-        df.to_excel(output_file, index=False)
+        match output_file.suffix:
+            case ".xls":
+                logger.warning(f"旧版的 Excel 格式不支持写入大文件, 尝试用 xlwt 库写入")
+                # 写入 xls 文件，旧版本的 Excel 格式
+                import xlwt
+            
+                # 创建一个 xlwt.Workbook 对象
+                wb = xlwt.Workbook()
+                ws = wb.add_sheet('Sheet1')
+                
+                # 写入列名
+                for col_idx, col_name in enumerate(df.columns):
+                    ws.write(0, col_idx, col_name)
+                
+                # 写入数据
+                for row_idx, row in df.iterrows():
+                    for col_idx, value in enumerate(row):
+                        ws.write(row_idx + 1, col_idx, value)
+                
+                # 保存为真正的 xls 文件
+                wb.save(output_file)
+            case _:
+                logger.info(f"文件后缀为 {output_file.suffix}, 使用 pd 方式存储 excel 文件处理器")
+                df.to_excel(output_file, index=False)
         
         logger.info(f"T7Code 文件转换完成, 源文件: {input_file}, 处理后的文件: {output_file}")
         return output_file
@@ -116,22 +139,29 @@ def proc_coa_file(input_file: str|Path, output_dir: str|Path) -> Path:
 
         new_df.iloc[3, 0:] = ''
 
-        new_df.iloc[4, 0] = 'Wafer ID'
-        new_df.iloc[4, 1] = 'T7Code'
-        new_df.iloc[4, 2] = 'BOW_X_UM'
-        new_df.iloc[4, 3] = 'Pass/Fail'
-        new_df.iloc[4, 4] = 'BOW_Y_UM'
-        new_df.iloc[4, 5] = 'Pass/Fail'
-        new_df.iloc[4, 6] = 'BOW_XY_UM'
-        new_df.iloc[4, 7] = 'Pass/Fail'
-        new_df.iloc[4, 8] = 'TTV_THK_RNG_A'
-        new_df.iloc[4, 9] = 'Pass/Fail'
-        new_df.iloc[4, 10] = 'SI_THK_UM'
-        new_df.iloc[4, 11] = 'Pass/Fail'
-        new_df.iloc[4, 12] = 'MAC_FS_DDP'
-        new_df.iloc[4, 13] = 'Pass/Fail'
-        new_df.iloc[4, 14] = 'VI Pass/Fail'
-        new_df.iloc[4, 15] = 'Final Pass/Fail'
+        # new_df.iloc[4, 0] = 'Wafer ID'
+        # new_df.iloc[4, 1] = 'T7Code'
+        # new_df.iloc[4, 2] = 'BOW_X_UM'
+        # new_df.iloc[4, 3] = 'Pass/Fail'
+        # new_df.iloc[4, 4] = 'BOW_Y_UM'
+        # new_df.iloc[4, 5] = 'Pass/Fail'
+        # new_df.iloc[4, 6] = 'BOW_XY_UM'
+        # new_df.iloc[4, 7] = 'Pass/Fail'
+        # new_df.iloc[4, 8] = 'TTV_THK_RNG_A'
+        # new_df.iloc[4, 9] = 'Pass/Fail'
+        # new_df.iloc[4, 10] = 'SI_THK_UM'
+        # new_df.iloc[4, 11] = 'Pass/Fail'
+        # new_df.iloc[4, 12] = 'MAC_FS_DDP'
+        # new_df.iloc[4, 13] = 'Pass/Fail'
+        # new_df.iloc[4, 14] = 'VI Pass/Fail'
+        # new_df.iloc[4, 15] = 'Final Pass/Fail'
+        # 设置表头信息
+        headers = ['Wafer ID', 'T7Code', 'BOW_X_UM', 'Pass/Fail', 
+                   'BOW_Y_UM', 'Pass/Fail', 'BOW_XY_UM', 'Pass/Fail',
+                   'TTV_THK_RNG_A', 'Pass/Fail', 'SI_THK_UM', 'Pass/Fail',
+                   'MAC_FS_DDP', 'Pass/Fail', 'VI Pass/Fail', 'Final Pass/Fail']
+        # 一次性为整行赋值
+        new_df.iloc[4, :len(headers)] = headers
 
         row_number = 5
         for i in range(old_df.shape[0]):
