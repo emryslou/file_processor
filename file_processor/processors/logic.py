@@ -212,8 +212,8 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
         logger.info("Logic APC 文件开始转换 ...")
         
         old_df = pd.read_excel(input_file)
-
-        lot_id = old_df.iloc[2, 1]
+        assert len(old_df.values) > 0, "Logic APC 数据为空"
+        lot_id = old_df.iloc[0, 1]
         new_columns = old_df.columns[0:4].tolist()
         new_columns.extend(['MACHINE_TYPE','EQUIPMENT_ID','RETICLE','SUBSTRATE_ID'])
         new_columns.extend(old_df.columns[6:17].to_list())

@@ -34,6 +34,15 @@ def fixture_logic(fixture_processor, test_file, output_dir):
         input_file.unlink()
     input_file.parent.rmdir()
 
+def _ouput_file_check(output_file: Path, file_name_prefix: str, file_name_suffix: str):
+    """
+    检查COA输出文件的内容是否符合预期
+    """
+    assert output_file.exists(), f"找不到输出文件: {output_file}"
+    assert output_file.stat().st_size > 0, "输出文件应该有内容"
+    assert output_file.name.startswith(file_name_prefix), f"输出文件应该以'{file_name_prefix}'开头"
+    assert output_file.name.endswith(file_name_suffix), f"输出文件应该以'{file_name_suffix}'结尾"
+
 @pytest.mark.parametrize("test_file, output_dir", [
     ("logic/bak/T7Code_logic.xlsx", "T7Code/"),
 ])
@@ -43,10 +52,8 @@ def test_logic_t7_code(fixture_logic):
     """
     assert Path(fixture_logic["input_file"]).exists(), "输入文件应该存在的"
     output_file = logic.proc_t7_code_file(**fixture_logic)
-    assert output_file.exists(), f"找不到输出文件: {output_file}"
-    assert output_file.stat().st_size > 0, "输出文件应该有内容"
-    assert output_file.name.startswith("T7Code_"), "输出文件应该以'T7Code_'开头"
-    assert output_file.name.endswith(".xls"), "输出文件应该是Excel文件"
+    _ouput_file_check(output_file, 'T7Code_', '.xls')
+
     # 检查输出文件的内容是否为老版Excel格式
     import xlrd
     with xlrd.open_workbook(output_file) as workbook:
@@ -62,6 +69,17 @@ def test_logic_t7_code(fixture_logic):
             assert len(row_values) == 3, f"输出文件的'Sheet1'工作表第{row_index+1}行应该有3个数据列"
 
 
+def _coa_output_data_valid(df: logic_pd.DataFrame):
+    assert df.iloc[0, 0] == 'Date:', "输出文件的第一行第一列应该是 'Date:', 但实际为 '{}'".format(df.iloc[0, 0])
+    assert df.fillna('').iloc[1, 0:6].tolist() == ['Customer ID:', '', 'Product ID:', '0CSN', 'Lot Pass/Fail:', 'Pass'], "第二行数据应该是 ['Customer ID:', '', 'Product ID:', '0CSN', 'Lot Pass/Fail:', 'Pass'], 但实际为 '{}'".format(df.iloc[1, :6].tolist())
+    
+    assert df.iloc[3, :].isnull().all(), "输出文件的第四行数据应该为空, 实际为: {}".format(df.iloc[3, :].tolist())
+    assert df.iloc[4, :].tolist() == ['Wafer ID', 'T7Code', 'BOW_X_UM', 'Pass/Fail', 
+                   'BOW_Y_UM', 'Pass/Fail', 'BOW_XY_UM', 'Pass/Fail',
+                   'TTV_THK_RNG_A', 'Pass/Fail', 'SI_THK_UM', 'Pass/Fail',
+                   'MAC_FS_DDP', 'Pass/Fail', 'VI Pass/Fail', 'Final Pass/Fail'], "第4行数据不匹配"
+    assert df.iloc[-2:, 0].tolist() == ['Spec USL', 'Spec LSL'], "输出文件的第五行到倒数第二行数据应该为空, 实际为: {}".format(df.iloc[-2:, 0].tolist())
+
 @pytest.mark.parametrize("test_file, output_dir", [
     ("logic/bak/COA-KPB425.xls", "COA/"),
 ])
@@ -71,18 +89,10 @@ def test_logic_coa(fixture_logic):
     """
     assert Path(fixture_logic["input_file"]).exists(), "输入文件应该存在的"
     output_file = logic.proc_coa_file(**fixture_logic)
-    assert output_file.exists(), f"找不到输出文件: {output_file}"
-    assert output_file.stat().st_size > 0, "输出文件应该有内容"
-    assert output_file.name.startswith("COA_"), "输出文件应该以'COA_'开头"
-    assert output_file.name.endswith(".csv"), "输出文件应该是CSV文件"
-
+    _ouput_file_check(output_file, 'COA_', '.csv')
     
     df = logic_pd.read_csv(output_file, header=None)
-    assert df.iloc[0, 0] == 'Date:', "输出文件的第一行第一列应该是 'Date:', 但实际为 '{}'".format(df.iloc[0, 0])
-    assert df.iloc[1, 0] == 'Customer ID:', "输出文件的第二行第一列应该是 'Customer ID:', 但实际为 '{}'".format(df.iloc[1, 0])
-    assert df.iloc[2, 0] == 'Lot ID:', "输出文件的第三行第一列应该是 'Lot ID:', 但实际为 '{}'".format(df.iloc[2, 0])
-    assert df.iloc[3, :].isnull().all(), "输出文件的第四行数据应该为空, 实际为: {}".format(df.iloc[3, :].tolist())
-    assert df.iloc[2, 2] == 'Wafer Qty:', "输出文件的第五行第一列应该是 'Wafer Qty:', 但实际为 '{}'".format(df.iloc[2, 2])
+    _coa_output_data_valid(df)
 
 
 @pytest.mark.parametrize("test_file, output_dir", [
@@ -92,50 +102,68 @@ def test_logic_coa_data(fixture_logic):
     """
     测试Logic COA数据函数
     """
-
+    import random
     assert Path(fixture_logic["input_file"]).exists(), "输入文件应该存在的"
-    output_file = logic.proc_coa_file(**fixture_logic)
-    assert output_file.exists(), f"找不到输出文件: {output_file}"
-    assert output_file.stat().st_size > 0, "输出文件应该有内容"
-    # 检查输出文件的内容是否符合预期
+    output_file = None
+    mock_data = [
+        ['KPB425','PWATU107MX', f'KPB425#{i:02d}']
+        for i in range(random.randint(3, 10))
+    ]
+    with patch("file_processor.processors.logic.pd.read_excel") as mock_read_excel:
+        mock_read_excel.return_value = logic_pd.DataFrame(data=mock_data, columns=['LOT NAME','T7CODE','WAFERID'])
+        output_file = logic.proc_coa_file(**fixture_logic)
+    if output_file is None:
+        raise AssertionError("输出文件应该存在的")
+    _ouput_file_check(output_file, 'COA_', '.csv')
+    df = logic_pd.read_csv(output_file, header=None)
+    _coa_output_data_valid(df)
+
+    assert df.iloc[5:5+len(mock_data), :2].values.tolist() == [
+        [wafer_id.replace('#', '_'), t7code] for _, t7code, wafer_id in mock_data
+    ], "源数据验证失败"
+
+    assert df.fillna('').iloc[5:5+len(mock_data), 3:].values.tolist() == [
+        ['Pass', '', 'Pass', '', 'Pass', '', 'Pass', '', 'Pass', '', 'Pass', 'Pass', 'Pass']
+    ] * len(mock_data), '固定数据验证失败'
 
 
 @pytest.fixture(scope="function", autouse=True)
 def fixture_apc_data_columns(request):
     return {
         'input_columns': [
-            'REPLY_DTTS','交货批次号','LOT_ID','PRODUCT_ID','LAYER_ID','MACHINE_TYPE','EQUIPMENT_ID',
-            'RETICLE','SUBSTRATE_ID','TRANS_X(nm)','TRANS_Y(nm)','EXP_X(ppm)','EXP_Y(ppm)', 'NON_ORTHO(urad)',
-            'ROTATION(urad)','SHOT_ROT(urad)','SHOT_MAG(ppm)', 'ASYM_ROT(urad)','ASYM_MAG(ppm)','CPE_ID',
+            'REPLY_DTTS', 'LOT_ID','PRODUCT_ID','LAYER_ID','RETICLE_ID','WAFER_ID',
+            'TRANS_X(nm)','TRANS_Y(nm)','EXP_X(ppm)','EXP_Y(ppm)','NON_ORTHO(urad)',
+            'ROTATION(urad)','SHOT_ROT(urad)','SHOT_MAG(ppm)','ASYM_ROT(urad)','ASYM_MAG(ppm)','CPE_ID',
         ],
         'output_columns': [
-            'REPLY_DTTS','LOT_ID','PRODUCT_ID','LAYER_ID','MACHINE_TYPE','EQUIPMENT_ID', 'RETICLE',
-            'SUBSTRATE_ID','TRANS_X(nm)','TRANS_Y(nm)','EXP_X(ppm)','EXP_Y(ppm)', 'NON_ORTHO(urad)',
-            'ROTATION(urad)','SHOT_ROT(urad)','SHOT_MAG(ppm)', 'ASYM_ROT(urad)','ASYM_MAG(ppm)','CPE_ID',
+            'REPLY_DTTS','LOT_ID','PRODUCT_ID','LAYER_ID','MACHINE_TYPE','EQUIPMENT_ID','RETICLE',
+            'SUBSTRATE_ID','TRANS_X(nm)','TRANS_Y(nm)','EXP_X(ppm)','EXP_Y(ppm)','NON_ORTHO(urad)',
+            'ROTATION(urad)','SHOT_ROT(urad)','SHOT_MAG(ppm)','ASYM_ROT(urad)','ASYM_MAG(ppm)','CPE_ID'
         ],
     }
 
 
+def _test_apc_columns(columns, fixture_apc_data_columns):
+    assert columns == fixture_apc_data_columns["output_columns"], "输出文件的列名\n应该是: '{}'\n实际为: '{}'".format(",".join(fixture_apc_data_columns["input_columns"]), ','.join(columns))
+
+
 @pytest.mark.parametrize("test_file, output_dir", [
-    ("logic/bak/APC_dram.xlsx", "APC/"),
+    ("logic/bak/0CSN-286-TTM2-APC-KPB425&KLE231.xlsx", "APC/"),
 ])
-def test_logic_apc(fixture_logic, fixture_apc_data_columns):
+def test_logic_apc_columns(fixture_logic, fixture_apc_data_columns):
     """
     测试DRAM APC函数
     """
     assert Path(fixture_logic["input_file"]).exists(), "输入文件应该存在的"
     output_file = logic.proc_apc_file(**fixture_logic)
-    assert output_file.exists(), f"找不到输出文件: {output_file}"
-    assert output_file.stat().st_size > 0, "输出文件应该有内容"
-    assert output_file.name.startswith("APC_"), "输出文件应该以'APC_'开头"
-    assert output_file.name.endswith(".xlsx"), "输出文件应该是Excel文件"
+    _ouput_file_check(output_file, 'APC_', '.xlsx')
     # 检查输出文件的内容是否符合预期
     output_df = logic_pd.read_excel(output_file)
-    assert output_df.columns.tolist() == fixture_apc_data_columns["output_columns"], "输出文件的列名应该是 '{}', 实际: {}".format(",".join(fixture_apc_data_columns["output_columns"]), str(output_df.columns.tolist()))
+    _test_apc_columns(output_df.columns.tolist(), fixture_apc_data_columns)
 
 
 @pytest.mark.parametrize("test_file, output_dir", [
-    ("logic/bak/APC_dram.xlsx", "APC/"),
+    ("logic/bak/0CSN-286-TTM2-APC-KPB425&KLE231.xlsx", "APC/"),
 ])
 def test_logic_apc_data(fixture_logic, fixture_apc_data_columns):
     """
@@ -143,105 +171,114 @@ def test_logic_apc_data(fixture_logic, fixture_apc_data_columns):
     """
     assert Path(fixture_logic["input_file"]).exists(), "输入文件应该存在的"
     
-    # case 1: 只有一行数据
+    # case 1: 空数据
     output_file = None
     with patch("file_processor.processors.logic.pd.read_excel") as mock_read_excel:
-        mock_read_excel.return_value = logic_pd.DataFrame(data=[
-            [
-                '	2025-08-29 09:56:10', 'BGGT332600','BP5044000','CWJGAN1.00','M4B','ASML',
-                'LKFACB02','CWJGAM4BAAH1','BP5044000_01','2.088','-6.442','0.226','0.256',
-                '-0.036','-0.097','-0.23','-0.007','0.052','-0.234','-'
-            ]
-        ], columns=fixture_apc_data_columns["input_columns"])
-        output_file = logic.proc_apc_file(**fixture_logic)
-    if output_file is None:
-        pytest.fail("输出文件应该被创建")
-    assert output_file.exists(), f"找不到输出文件: {output_file}"
-    assert output_file.stat().st_size > 0, "输出文件应该有内容"
-    assert output_file.name.startswith("APC_"), "输出文件应该以'APC_'开头"
-    assert output_file.name.endswith(".xlsx"), "输出文件应该是Excel文件"
-    # 检查输出文件的内容是否符合预期
-    output_df = logic_pd.read_excel(output_file)
-    assert output_df.columns.tolist() == fixture_apc_data_columns["output_columns"], "输出文件的列名\n应该是: '{}'\n实际为: '{}'".format(",".join(fixture_apc_data_columns["output_columns"]), ','.join(output_df.columns.tolist()))
-    assert output_df.iloc[:, 0].tolist() == ['2025/8/29 9:56'], "输出文件的第一列第一行应该是 '2025/8/29 9:56', 但实际为 '{}'".format(output_df.iloc[:, 0].tolist()[0])
-    assert output_df.iloc[:, 1].tolist() == ['BGGT332600'], "输出文件的第二列第一行应该是 'BGGT332600', 但实际为 '{}'".format(output_df.iloc[:, 1].tolist()[0])
-    assert output_df.iloc[:, 7].tolist() == ['1' + '0' * 24], "输出文件的第八列第一行应该是 {}, 但实际为 '{}'".format('1' + '0' * 24, output_df.iloc[:, 7].tolist()[0])
-    assert len(output_df.iloc[:, 0].tolist()) == 1, "输出文件的第一列应该只有 1 行数据"
-
-    # case 2: 有多行数据, 第 5 列一致
-    output_file = None
-    with patch("file_processor.processors.logic.pd.read_excel") as mock_read_excel:
-        mock_read_excel.return_value = logic_pd.DataFrame(data=[    
-            [
-                '	2025-08-29 09:56:10', 'BGGT332600','BP5044000','CWJGAN1.00','M4B','ASML',
-                'LKFACB02','CWJGAM4BAAH1','BP5044000_01','2.088','-6.442','0.226','0.256',
-                '-0.036','-0.097','-0.23','-0.007','0.052','-0.234','-'
-            ],
-            [
-                '	2025-08-29 09:56:10', 'BGGT332600','BP5044000','CWJGAN1.00','M4B','ASML',
-                'LKFACB02','CWJGAM4BAAH1','BP5044000_02','2.088','-6.442','0.226','0.256',
-                '-0.036','-0.097','-0.23','-0.007','0.052','-0.234','-'
-            ]
-        ], columns=fixture_apc_data_columns["input_columns"])
-        output_file = logic.proc_apc_file(**fixture_logic)
-    if output_file is None:
-        pytest.fail("输出文件应该被创建")
-    assert output_file.exists(), f"找不到输出文件: {output_file}"
-    assert output_file.stat().st_size > 0, "输出文件应该有内容"
-    assert output_file.name.startswith("APC_"), "输出文件应该以'APC_'开头"
-    assert output_file.name.endswith(".xlsx"), "输出文件应该是Excel文件"
-    # 检查输出文件的内容是否符合预期
-    output_df = logic_pd.read_excel(output_file)
-    assert output_df.columns.tolist() == fixture_apc_data_columns["output_columns"], "输出文件的列名\n应该是: '{}'\n实际为: '{}'".format(",".join(fixture_apc_data_columns["output_columns"]), ','.join(output_df.columns.tolist()))
-    assert output_df.iloc[:, 0].tolist() == ['2025/8/29 9:56'], "输出文件的第一列第一行应该是 '2025/8/29 9:56', 但实际为 '{}'".format(output_df.iloc[:, 0].tolist()[0])
-    assert output_df.iloc[:, 1].tolist() == ['BGGT332600'], "输出文件的第二列第一行应该是 'BGGT332600', 但实际为 '{}'".format(output_df.iloc[:, 1].tolist()[0])
-    assert output_df.iloc[:, 7].tolist() == [convert_subtitle_id_to_binstr(['BP5044000_01', 'BP5044000_02'])], "输出文件的第八列第一行应该是 {}, 但实际为 '{}'".format(convert_subtitle_id_to_binstr(['BP5044000_01', 'BP5044000_02']), output_df.iloc[:, 7].tolist()[0])
-    assert len(output_df.iloc[:, 0].tolist()) == 1, "输出文件的第一列应该只有 1 行数据"
-
-    # case 3: 有多行数据, 第 5 列不一致
-    output_file = None
-    with patch("file_processor.processors.logic.pd.read_excel") as mock_read_excel:
-        mock_read_excel.return_value = logic_pd.DataFrame(data=[
-            [
-                '	2025-08-29 09:56:10', 'BGGT332600','BP5044000','CWJGAN1.00','M4B','ASML',
-                'LKFACB02','CWJGAM4BAAH1','BP5044000_01','2.088','-6.442','0.226','0.256',
-                '-0.036','-0.097','-0.23','-0.007','0.052','-0.234','-'
-            ],
-            [
-                '	2025-08-29 09:56:10', 'BGGT332600','BP5044000','CWJGAN1.00','TB1','ASML',
-                'LKFACB02','CWJGAM4BAAH1','BP5044000_02','2.088','-6.442','0.226','0.256',
-                '-0.036','-0.097','-0.23','-0.007','0.052','-0.234','-'
-            ]
-        ], columns=fixture_apc_data_columns["input_columns"])
-        output_file = logic.proc_apc_file(**fixture_logic)
-    if output_file is None:
-        pytest.fail("输出文件应该被创建")
-    assert output_file.exists(), f"找不到输出文件: {output_file}"
-    assert output_file.stat().st_size > 0, "输出文件应该有内容"
-    assert output_file.name.startswith("APC_"), "输出文件应该以'APC_'开头"
-    assert output_file.name.endswith(".xlsx"), "输出文件应该是Excel文件"
-    # 检查输出文件的内容是否符合预期
-    output_df = logic_pd.read_excel(output_file)
-    assert output_df.columns.tolist() == fixture_apc_data_columns["output_columns"], "输出文件的列名\n应该是: '{}'\n实际为: '{}'".format(",".join(fixture_apc_data_columns["output_columns"]), ','.join(output_df.columns.tolist()))
-    assert output_df.iloc[:, 0].tolist() == ['2025/8/29 9:56'] * 2, "输出文件的第一列第一行应该是 '2025/8/29 9:56', 但实际为 '{}'".format(output_df.iloc[:, 0].tolist())
-    assert output_df.iloc[:, 1].tolist() == ['BGGT332600'] * 2, "输出文件的第二列第一行应该是 'BGGT332600', 但实际为 '{}'".format(output_df.iloc[:, 1].tolist())
-    assert output_df.iloc[:, 7].tolist() == ['1' + '0' * 24, '01' + '0' * 23], "输出文件的第八列第一行应该是 {}, 但实际为 '{}'".format(['1' + '0' * 24, '01' + '0' * 23], output_df.iloc[:, 7].tolist())
-    assert len(output_df.iloc[:, 0].tolist()) == 2, "输出文件的第一列应该只有 2 行数据"
-
-    # case 3: 有多行数据, 第 5 列一致, 第 9 列不一样
-    output_file = None
-    with patch("file_processor.processors.logic.pd.read_excel") as mock_read_excel:
-        mock_read_excel.return_value = logic_pd.DataFrame(data=[
-            [
-                '	2025-08-29 09:56:10', 'BGGT332600','BP5044000','CWJGAN1.00','M4B','ASML',
-                'LKFACB02','CWJGAM4BAAH1','BP5044000_01','2.088','-6.442','0.226','0.256',
-                '-0.036','-0.097','-0.23','-0.007','0.052','-0.234','-'
-            ],
-            [
-                '	2025-08-29 09:56:10', 'BGGT332600','BP5044000','CWJGAN1.00','M4B','ASML',
-                'LKFACB02','CWJGAM4BAAH1','BP5044000_02','2.089','-6.442','0.226','0.256',
-                '-0.036','-0.097','-0.23','-0.007','0.052','-0.234','-'
-            ]
-        ], columns=fixture_apc_data_columns["input_columns"])
-        with pytest.raises(ValueError, match="不同，无法构建二进制表示"):
+        mock_read_excel.return_value = logic_pd.DataFrame(data=[], columns=fixture_apc_data_columns["input_columns"])
+        with pytest.raises(AssertionError, match="Logic APC 数据为空"):
             logic.proc_apc_file(**fixture_logic)
+    
+    # case 2: 1 条数据
+    output_file = None
+    with patch("file_processor.processors.logic.pd.read_excel") as mock_read_excel:
+        mock_read_excel.return_value = logic_pd.DataFrame(data=[
+            [
+                '2025-9-29 3:43:00','KLE231','0CSN','286','0CSN00286AA1','21','0.236384229','12.64316584','0.016574739',
+                '0.016894928','0.057643334','-0.018472039','-0.096117685','-0.536043252','0.007014191','-0.287610648','NA'
+            ],
+        ], columns=fixture_apc_data_columns["input_columns"])
+        output_file =   logic.proc_apc_file(**fixture_logic)
+    if output_file is None:
+        pytest.fail("输出文件应该被创建")
+    _ouput_file_check(output_file, 'APC_', '.xlsx')
+    # 检查输出文件的内容是否符合预期
+    output_df = logic_pd.read_excel(output_file)
+    _test_apc_columns(output_df.columns.tolist(), fixture_apc_data_columns)
+    assert len(output_df.values) == 1, "Logic APC 数据转换后, 应该只有 1 条数据"
+
+
+    # case 3: 2 条数据, 但处理后应该只有一条
+    output_file = None
+    with patch("file_processor.processors.logic.pd.read_excel") as mock_read_excel:
+        mock_read_excel.return_value = logic_pd.DataFrame(data=[
+            [
+                '2025-9-29 3:43:00','KLE231','0CSN','286','0CSN00286AA1','21','0.236384229','12.64316584','0.016574739',
+                '0.016894928','0.057643334','-0.018472039','-0.096117685','-0.536043252','0.007014191','-0.287610648','NA'
+            ],
+            [
+                '2025-9-29 3:43:00','KLE231','0CSN','286','0CSN00286AA1','25','0.236384229','12.64316584','0.016574739',
+                '0.016894928','0.057643334','-0.018472039','-0.096117685','-0.536043252','0.007014191','-0.287610648','NA'
+            ],
+        ], columns=fixture_apc_data_columns["input_columns"])
+        output_file =   logic.proc_apc_file(**fixture_logic)
+    if output_file is None:
+        pytest.fail("输出文件应该被创建")
+    _ouput_file_check(output_file, 'APC_', '.xlsx')
+    # 检查输出文件的内容是否符合预期
+    output_df = logic_pd.read_excel(output_file)
+    _test_apc_columns(output_df.columns.tolist(), fixture_apc_data_columns)
+    assert len(output_df.values) == 1, "Logic APC 数据转换后, 应该只有 1 条数据"
+
+
+    # case 4: 2 条数据, 因为参数差异，应该处理失败
+    output_file = None
+    with patch("file_processor.processors.logic.pd.read_excel") as mock_read_excel:
+        mock_read_excel.return_value = logic_pd.DataFrame(data=[
+            [
+                '2025-9-29 3:43:00','KLE231','0CSN','286','0CSN00286AA1','21','0.236384229','12.64316584','0.016574739',
+                '0.016894928','0.057643334','-0.018472039','-0.096117685','-0.536043252','0.007014191','-0.287610648','NA'
+            ],
+            [
+                '2025-9-29 3:43:00','KLE231','0CSN','286','0CSN00286AA1','25','0.236384229','12.64316584','0.016574739',
+                '0.016894928','0.057643334','-0.018472039','-0.096117685','-0.536043252','0.007014195','-0.287610648','NA'
+            ],
+        ], columns=fixture_apc_data_columns["input_columns"])
+        with pytest.raises(ValueError, match="参数有差异不能合并"):
+            logic.proc_apc_file(**fixture_logic)
+
+
+    # case 5: 2 条数据，layer_id 列不同，合并后数据应该有 2 条
+    output_file = None
+    with patch("file_processor.processors.logic.pd.read_excel") as mock_read_excel:
+        mock_read_excel.return_value = logic_pd.DataFrame(data=[
+            [
+                '2025-9-29 3:43:00','KLE231','0CSN','286','0CSN00286AA1','21','0.236384229','12.64316584','0.016574739',
+                '0.016894928','0.057643334','-0.018472039','-0.096117685','-0.536043252','0.007014191','-0.287610648','NA'
+            ],
+            [
+                '2025-9-29 3:43:00','KLE231','0CSN','127','0CSN00286AA1','25','0.236384229','12.64316584','0.016574739',
+                '0.016894928','0.057643334','-0.018472039','-0.096117685','-0.536043252','0.007014195','-0.287610648','NA'
+            ],
+        ], columns=fixture_apc_data_columns["input_columns"])
+        output_file =   logic.proc_apc_file(**fixture_logic)
+    if output_file is None:
+        pytest.fail("输出文件应该被创建")
+    _ouput_file_check(output_file, 'APC_', '.xlsx')
+    # 检查输出文件的内容是否符合预期
+    output_df = logic_pd.read_excel(output_file)
+    _test_apc_columns(output_df.columns.tolist(), fixture_apc_data_columns)
+    assert len(output_df.values) == 2, "Logic APC 数据转换后, 应该只有 2 条数据"
+
+
+    # case 6: 验证 第 8 列数据是否正确
+    output_file = None
+    with patch("file_processor.processors.logic.pd.read_excel") as mock_read_excel:
+        mock_read_excel.return_value = logic_pd.DataFrame(data=[
+            [
+                '2025-9-29 3:43:00','KLE231','0CSN','286','0CSN00286AA1','21','0.236384229','12.64316584','0.016574739',
+                '0.016894928','0.057643334','-0.018472039','-0.096117685','-0.536043252','0.007014191','-0.287610648','NA'
+            ],
+            [
+                '2025-9-29 3:43:00','KLE231','0CSN','286','0CSN00286AA1','25','0.236384229','12.64316584','0.016574739',
+                '0.016894928','0.057643334','-0.018472039','-0.096117685','-0.536043252','0.007014191','-0.287610648','NA'
+            ],
+        ], columns=fixture_apc_data_columns["input_columns"])
+        output_file =   logic.proc_apc_file(**fixture_logic)
+    if output_file is None:
+        pytest.fail("输出文件应该被创建")
+    _ouput_file_check(output_file, 'APC_', '.xlsx')
+    # 检查输出文件的内容是否符合预期
+    output_df = logic_pd.read_excel(output_file, dtype=object)
+    _test_apc_columns(output_df.columns.tolist(), fixture_apc_data_columns)
+    assert len(output_df.values) == 1, "Logic APC 数据转换后, 应该只有 1 条数据"
+    assert output_df.iloc[:, 7].tolist() == [convert_subtitle_id_to_binstr(['xxx_21', 'xxx_25'])], f"Logic APC 数据转换后, 第 8 列数据应该为 {convert_subtitle_id_to_binstr(['xxx_21', 'xxx_25'])}, 实际为 {output_df.iloc[:, 7].tolist()}"
