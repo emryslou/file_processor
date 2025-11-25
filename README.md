@@ -12,6 +12,10 @@
 
 
 ## 版本更新
+## 0.0.3-rc3
+1. dram & logic：apc文件处理: 合并行时，数据对比，忽略前后空格 @dukang
+2. dram & logic：apc文件处理: 合并行时，数据对比，N/A 值 替换为空字符串 @dukang
+
 ## 0.0.3-rc2
 1. Issue Fix: T7Code（dram & logic）文件转换为xls时，要使用xlwt引擎，在某些场景下可能文件没法使用 @dukang
 
@@ -78,10 +82,13 @@ file_processor
 ├── setup.py
 └── tests
     ├── meta
+    ├── notification
+    ├── processors
+    ├── stores
     ├── test_ftp_match.py
     └── utils
 
-11 directories, 31 files
+14 directories, 31 files
 
 ```
 

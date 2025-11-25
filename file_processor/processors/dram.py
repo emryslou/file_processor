@@ -176,9 +176,12 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
                 for (idx, item) in enumerate(items[item_column]):
                     if key_item_size > 1:
                         if old_item is None:
-                            old_item = items.iloc[idx, 9:].copy()
-                        elif not (old_item == items.iloc[idx, 9:]).all():
-                            raise ValueError(f"项目 '{items.iloc[idx, 9:].to_string()}' 与前一个项目 '{old_item.to_string()}' 不同，无法构建二进制表示")
+                            # FixIssue: N/A 值处理, 替换为 ''
+                            old_item = items.fillna('').iloc[idx, 9:].copy()
+                            logger.debug(f'项目 {idx}: {old_item.to_string()}')
+                        elif not (old_item == items.fillna('').iloc[idx, 9:]).all(): # FixIssue: N/A 值处理, 替换为 ''
+                            
+                            raise ValueError(f"项目 '{items.fillna('').iloc[idx, 9:].to_string()}' 与前一个项目 '{old_item.fillna('').to_string()}' 不同，无法构建二进制表示")  
                     # 提取数字部分并计算位位置
                     item_str = str(item)
                     if '_' in item_str:
@@ -204,7 +207,9 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
 
             # 设置二进制结果
             new_row.iloc[result_column_idx] = binary_result
-            new_df = pd.concat([new_df, pd.DataFrame([new_row], dtype=object)], ignore_index=True)
+
+            # FixIssue: 去除所有字符串字段的首尾空格
+            new_df = pd.concat([new_df.applymap(lambda x: x.strip() if isinstance(x, str) else x), pd.DataFrame([new_row], dtype=object)], ignore_index=True)
             
         
         output_file = Path(output_dir) / f"APC_{lot_id}.xlsx"
@@ -215,5 +220,5 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
         return output_file
     
     except Exception as e:
-        logger.error(f"Dram APC 文件转换失败：{e}")
+        logger.exception(f"Dram APC 文件转换失败：{e}")
         raise e

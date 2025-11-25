@@ -38,7 +38,10 @@ file_processor
 ├── setup.py
 └── tests
     ├── meta
+    ├── notification
+    ├── processors
+    ├── stores
     ├── test_ftp_match.py
     └── utils
 
-11 directories, 31 files
+14 directories, 31 files

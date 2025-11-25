@@ -223,17 +223,20 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
         reply_dtts_idx = new_columns.index('REPLY_DTTS')
         reticle_idx = new_columns.index('RETICLE')
         for layer_id, items in old_df.groupby(old_df.columns[3], sort=False):
-            new_row =  items.iloc[0].copy().reindex(new_columns)
+
+            # FixIssue: N/A 值处理, 替换为 ''
+            new_row: pd.Series =  items.iloc[0].copy().reindex(new_columns).fillna('')
             subtitle_id_bin = 0b0
             old_item = None
             for idx, item in enumerate(items[old_df.columns[5]]):
                 if len(items) > 1:
                     if old_item is None:
-                        old_item = items.iloc[idx, 6:].copy().fillna('')
-                    elif not(old_item == items.iloc[idx, 6:].fillna('')).all():
+                        # FixIssue: N/A 值处理, 替换为 ''
+                        old_item = items.fillna('').iloc[idx, 6:].copy()
+                    elif not(old_item == items.fillna('').iloc[idx, 6:]).all():
                         logger.error(f"{layer_id} 的参数有差异不能合并")
-                        logger.error(f"第 {idx+1} 行参数: {old_item.tolist()}")
-                        logger.error(f"第 {idx+2} 行参数: {items.iloc[idx, 6:].tolist()}")
+                        logger.error(f"第 {idx+1} 行参数: {old_item.fillna('').tolist()}")
+                        logger.error(f"第 {idx+2} 行参数: {items.fillna('').iloc[idx, 6:].tolist()}")
                         raise ValueError(f"{layer_id} 的参数有差异不能合并")
                 logger.info(f"第 {idx+1} 行参数: {item}")
                 subtitle_id_bin |= (1 << (24 - (int(str(item)[-2:]) - 1)))
