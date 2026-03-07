@@ -9,6 +9,10 @@
 8. 处理器: 支持 逻辑处理器 (logic) 和 内存处理器 (dram)
 
 # 版本更新
+## 0.0.3-rc5
+1. dram & logic apc：传入时间兼容: %Y-%m-%d %H:%M:%S 和 %Y-%m-%d %H:%M
+2. dram & logic apc：存入原始数据日期格式，让 pd 自动转为 原生 excel 格式
+
 ## 0.0.3-rc3
 1. dram & logic：apc文件处理: 合并行时，数据对比，忽略前后空格 @dukang
 2. dram & logic：apc文件处理: 合并行时，数据对比，N/A 值 替换为空字符串 @dukang

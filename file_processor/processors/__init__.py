@@ -46,7 +46,7 @@ def proc_files(config: dict):
         'message': '',
         'info': {},
     }
-    driver = config['driver']
+    driver = config.get("driver", None) 
     assert driver is not None, "未指定驱动"
     assert driver in _drivers, f"未找到驱动 {driver}"
     stores: dict[str, dict] = {}
