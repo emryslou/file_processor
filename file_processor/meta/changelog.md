@@ -9,6 +9,9 @@
 8. 处理器: 支持 逻辑处理器 (logic) 和 内存处理器 (dram)
 
 # 版本更新
+## 0.0.3-rc6
+1. dram apc: 时间格式：%Y-%m-%d %H:%M, %Y-%m-%d %H:%M:%S, %Y/%m/%d %H:%M, %Y/%m/%d %H:%M:%S 
+
 ## 0.0.3-rc5
 1. dram & logic apc：传入时间兼容: %Y-%m-%d %H:%M:%S 和 %Y-%m-%d %H:%M
 2. dram & logic apc：存入原始数据日期格式，让 pd 自动转为 原生 excel 格式
