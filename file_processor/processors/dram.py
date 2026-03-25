@@ -3,6 +3,8 @@ from pathlib import Path
 from ..stores import create_store
 import pandas as pd
 from datetime import datetime
+from ..utils.tools import valid_time_format
+
 
 
 def proc_t7_code_file(input_file: str|Path, output_dir: str|Path) -> Path:
@@ -199,10 +201,7 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
             # 将结果转换为25位二进制字符串（确保前导零）
             binary_result = format(subtitle_id_bin, '025b')
             # 去除日期字段开头的空格
-            try:
-                cell_0 = datetime.strptime(str(new_row.iloc[0]).strip(), "%Y-%m-%d %H:%M:%S")
-            except ValueError:
-                cell_0 = datetime.strptime(str(new_row.iloc[0]).strip(), "%Y-%m-%d %H:%M")
+            cell_0 = valid_time_format(str(new_row.iloc[0]).strip())
 
             # Issue Fix: apc文件的第一列日期时间格式，要去掉秒， 不管dram还是logic @dukang
             new_row.iloc[0] = f"{cell_0.year}/{cell_0.month}/{cell_0.day} {cell_0.hour}:{cell_0.minute:02d}"
