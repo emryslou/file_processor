@@ -12,6 +12,13 @@
 
 
 ## 版本更新
+## 0.0.3-rc6
+1. dram apc: 时间格式：%Y-%m-%d %H:%M, %Y-%m-%d %H:%M:%S, %Y/%m/%d %H:%M, %Y/%m/%d %H:%M:%S
+
+## 0.0.3-rc5
+1. dram & logic apc：传入时间兼容: %Y-%m-%d %H:%M:%S 和 %Y-%m-%d %H:%M
+2. dram & logic apc：存入原始数据日期格式，让 pd 自动转为 原生 excel 格式
+
 ## 0.0.3-rc3
 1. dram & logic：apc文件处理: 合并行时，数据对比，忽略前后空格 @dukang
 2. dram & logic：apc文件处理: 合并行时，数据对比，N/A 值 替换为空字符串 @dukang
@@ -54,12 +61,14 @@ file_processor
 │   │   ├── changelog.md
 │   │   ├── example.yml
 │   │   ├── package_structure.txt
-│   │   └── readme.tpl.md
+│   │   ├── readme.tpl.md
+│   │   └── test-cov-report.md
 │   ├── notification
 │   │   ├── __init__.py
 │   │   └── email.py
 │   ├── processors
 │   │   ├── __init__.py
+│   │   ├── data_pipe.py
 │   │   ├── dram.py
 │   │   └── logic.py
 │   ├── stores
@@ -73,7 +82,9 @@ file_processor
 │       ├── __init__.py
 │       ├── config.py
 │       ├── logger.py
-│       └── package_info.py
+│       ├── package_info.py
+│       └── tools.py
+├── pytest.ini
 ├── scripts
 │   ├── build.sh
 │   ├── proxy.sh
@@ -82,13 +93,30 @@ file_processor
 ├── setup.py
 └── tests
     ├── meta
+    │   └── test_meta.py
     ├── notification
+    │   ├── test_email.py
+    │   └── test_notification.py
     ├── processors
+    │   ├── __init__.py
+    │   ├── test_data_pipe.py
+    │   ├── test_dram.py
+    │   ├── test_logic.py
+    │   └── test_processor.py
     ├── stores
+    │   ├── test_ftp.py
+    │   ├── test_ftps.py
+    │   ├── test_local.py
+    │   ├── test_sftp.py
+    │   └── test_store.py
     ├── test_ftp_match.py
     └── utils
+        ├── test_config.py
+        ├── test_logger.py
+        ├── test_package_info.py
+        └── test_tools.py
 
-14 directories, 31 files
+14 directories, 52 files
 
 ```
 

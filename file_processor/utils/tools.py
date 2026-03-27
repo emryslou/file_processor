@@ -9,7 +9,7 @@ def support_formats():
         '%Y/%m/%d %H:%M:%S',
     ]
 
-def valid_time_format(time_value):
+def valid_time_format(time_value: str) -> datetime:
     time_formats = support_formats()
 
     valid_errs = []
