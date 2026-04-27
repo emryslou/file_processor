@@ -10,12 +10,14 @@ file_processor
 │   │   ├── changelog.md
 │   │   ├── example.yml
 │   │   ├── package_structure.txt
-│   │   └── readme.tpl.md
+│   │   ├── readme.tpl.md
+│   │   └── test-cov-report.md
 │   ├── notification
 │   │   ├── __init__.py
 │   │   └── email.py
 │   ├── processors
 │   │   ├── __init__.py
+│   │   ├── data_pipe.py
 │   │   ├── dram.py
 │   │   └── logic.py
 │   ├── stores
@@ -29,7 +31,9 @@ file_processor
 │       ├── __init__.py
 │       ├── config.py
 │       ├── logger.py
-│       └── package_info.py
+│       ├── package_info.py
+│       └── tools.py
+├── pytest.ini
 ├── scripts
 │   ├── build.sh
 │   ├── proxy.sh
@@ -38,10 +42,27 @@ file_processor
 ├── setup.py
 └── tests
     ├── meta
+    │   └── test_meta.py
     ├── notification
+    │   ├── test_email.py
+    │   └── test_notification.py
     ├── processors
+    │   ├── __init__.py
+    │   ├── test_data_pipe.py
+    │   ├── test_dram.py
+    │   ├── test_logic.py
+    │   └── test_processor.py
     ├── stores
+    │   ├── test_ftp.py
+    │   ├── test_ftps.py
+    │   ├── test_local.py
+    │   ├── test_sftp.py
+    │   └── test_store.py
     ├── test_ftp_match.py
     └── utils
+        ├── test_config.py
+        ├── test_logger.py
+        ├── test_package_info.py
+        └── test_tools.py
 
-14 directories, 31 files
+14 directories, 52 files

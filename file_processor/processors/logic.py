@@ -4,6 +4,7 @@ from datetime import datetime
 
 from file_processor.stores import create_store
 from file_processor.utils.logger import logger
+from ..utils.tools import valid_time_format
 
 def proc_t7_code_file(input_file: str|Path, output_dir: str|Path) -> Path:
     """ 处理 Logic T7Code 文件"""
@@ -243,10 +244,11 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
             
             #  Fix: logic的APC文件，REPLY_DTTS对应的日期，要和Dram一样，是2025/9/29 03:43:00这种，不要自定义的2025-09-29 03:43:00 @dukang
 
-            try:
-                cell_0 = datetime.strptime(str(new_row.iloc[reply_dtts_idx]).strip(), "%Y-%m-%d %H:%M:%S")
-            except ValueError:
-                cell_0 = datetime.strptime(str(new_row.iloc[reply_dtts_idx]).strip(), "%Y-%m-%d %H:%M")
+            # try:
+            #     cell_0 = datetime.strptime(str(new_row.iloc[reply_dtts_idx]).strip(), "%Y-%m-%d %H:%M:%S")
+            # except ValueError:
+            #     cell_0 = datetime.strptime(str(new_row.iloc[reply_dtts_idx]).strip(), "%Y-%m-%d %H:%M")
+            cell_0 = valid_time_format(str(new_row.iloc[reply_dtts_idx]).strip())
             # Issue Fix: apc文件的第一列日期时间格式，要去掉秒， 不管dram还是logic @dukang
             new_row.iloc[reply_dtts_idx] = cell_0 # f"{cell_0.year}/{cell_0.month}/{cell_0.day} {cell_0.hour}:{cell_0.minute:02d}"
             

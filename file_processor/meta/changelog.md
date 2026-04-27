@@ -9,6 +9,9 @@
 8. 处理器: 支持 逻辑处理器 (logic) 和 内存处理器 (dram)
 
 # 版本更新
+## 0.0.3-rc7
+1. 修复: dram & logic: apc 文件：日期格式输出时间对象，格式由 excel 自行决定
+
 ## 0.0.3-rc6
 1. dram apc: 时间格式：%Y-%m-%d %H:%M, %Y-%m-%d %H:%M:%S, %Y/%m/%d %H:%M, %Y/%m/%d %H:%M:%S 
 

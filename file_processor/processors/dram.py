@@ -204,7 +204,7 @@ def proc_apc_file(input_file: str|Path, output_dir: str|Path) -> Path:
             cell_0 = valid_time_format(str(new_row.iloc[0]).strip())
 
             # Issue Fix: apc文件的第一列日期时间格式，要去掉秒， 不管dram还是logic @dukang
-            new_row.iloc[0] = f"{cell_0.year}/{cell_0.month}/{cell_0.day} {cell_0.hour}:{cell_0.minute:02d}"
+            new_row.iloc[0] = cell_0 # f"{cell_0.year}/{cell_0.month}/{cell_0.day} {cell_0.hour}:{cell_0.minute:02d}"
 
 
             # 设置二进制结果
